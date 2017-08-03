@@ -4,3 +4,4 @@
 # Python
 *.pyc
 *.egg-info
+dist

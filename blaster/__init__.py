@@ -1,1 +1,4 @@
-__version__ = '0.0.0'
+from .core import BlasterError
+from .worker import Blaster
+
+__version__ = '0.1.0'

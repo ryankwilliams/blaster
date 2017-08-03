@@ -5,8 +5,7 @@ all: clean-pyc clean
 clean-all: clean-pyc clean
 
 clean:
-	rm -rf blaster/*.egg
-	rm -rf blaster/*.egg-info
+	rm -rf *.egg*
 	rm -rf .cache
 
 clean-pyc:
