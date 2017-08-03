@@ -14,7 +14,7 @@ def version():
 setup(
     name='blaster',
     version=version(),
-    description='Blast off a list of tasks concurrently calling each tasks'
+    description='Blast off a list of tasks concurrently calling each tasks '
                 'methods defined',
     url='https://github.com/rywillia/blaster',
     author='Ryan Williams',
