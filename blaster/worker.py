@@ -7,6 +7,7 @@ from uuid import uuid4
 from . import BlasterError
 from .constants import REQ_TASK_KEYS
 from .core import CalcTimeMixin, LoggerMixin
+from copy import deepcopy
 
 
 class Processor(Process):
@@ -25,7 +26,7 @@ class Processor(Process):
         self.queue = queue
 
         self.task_obj = object
-        self.task_id = self.task_def['id']
+        self.task_id = self.task_def['_id']
         self.task_name = self.task_def['name']
         self.task_cls = self.task_def.pop('task')
         self.methods = self.task_def.pop('methods')
@@ -35,7 +36,7 @@ class Processor(Process):
 
         # results template
         _res_struct = dict(
-            id=self.task_id,
+            _id=self.task_id,
             name=self.task_name,
             task=self.task_cls,
             status=None,
@@ -57,8 +58,8 @@ class Processor(Process):
                     status=0
                 ))
 
-                # put overall status
-                _res_struct.update(dict(status=0))
+            # put overall status
+            _res_struct.update(dict(status=0))
         except Exception as ex:
             # log traceback
             print_exc()
@@ -89,6 +90,9 @@ class Processor(Process):
             # put overall status
             _res_struct.update(dict(status=1))
         finally:
+            # update task definition into queue
+            _res_struct.update(self.task_def)
+
             # put results into queue
             self.queue.put(_res_struct)
 
@@ -146,6 +150,7 @@ class Blaster(LoggerMixin, CalcTimeMixin):
         self.logger.debug('Start: building processes..')
         for index, task in enumerate(self.tasks):
             index += 1
+
             # check if required task definition keys exist
             if not self.validate_task_def(task):
                 raise BlasterError(
@@ -153,12 +158,12 @@ class Blaster(LoggerMixin, CalcTimeMixin):
                 )
 
             # generate random unique id
-            task['id'] = str(uuid4())
+            task['_id'] = str(uuid4())
 
             self.logger.info('%s. TASK ~ %s, METHODS: %s' %
                              (index, task['task'].__name__, task['methods']))
 
-            self.processes.append(Processor(task, self.queue))
+            self.processes.append(Processor(deepcopy(task), self.queue))
         self.logger.debug('End: building processes.')
         self.logger.debug(pformat(self.processes))
         self.logger.info('.' * 30)
@@ -186,11 +191,14 @@ class Blaster(LoggerMixin, CalcTimeMixin):
             for p in self.processes:
                 self.results.append(self.queue.get())
 
-            # correlate the data
-            for res in self.results:
-                data = self.map_task_to_results(res)
-                res.update(data)
-                res.pop('id')
+            # correlate the results with initial tasks
+            for task in self.tasks:
+                data = self.map_task_to_results(task)
+                task.pop('_id')
+                data.pop('_id')
+                for key, value in data.items():
+                    if key in task:
+                        task[key] = value
 
             self.logger.info('Blast off was able to run all tasks given!')
         except KeyboardInterrupt:
@@ -198,11 +206,14 @@ class Blaster(LoggerMixin, CalcTimeMixin):
             for p in self.processes:
                 self.results.append(self.queue.get())
 
-            # correlate the data
-            for res in self.results:
-                data = self.map_task_to_results(res)
-                res.update(data)
-                res.pop('id')
+            # correlate the results with initial tasks
+            for task in self.tasks:
+                data = self.map_task_to_results(task)
+                task.pop('_id')
+                data.pop('_id')
+                for key, value in data.items():
+                    if key in task:
+                        task[key] = value
 
             # terminate processes
             for p in self.processes:
@@ -215,6 +226,9 @@ class Blaster(LoggerMixin, CalcTimeMixin):
         finally:
             # save end time
             self.end()
+
+            # update tasks list
+            # self.tasks = self.results
 
             # calculate time delta
             hour, minutes, seconds = self.delta()
@@ -234,21 +248,24 @@ class Blaster(LoggerMixin, CalcTimeMixin):
             else:
                 return self.results
 
-    def map_task_to_results(self, res):
+    def map_task_to_results(self, task):
         """Map the task to the one defined in the results. This is needed to
         correlate the data.
 
-        :param res: Resource element.
+        :param res: Task element.
         :type res: dict
-        :return: The matching task element.
+        :return: The matching resource element.
         :rtype: dict
         """
         element = None
 
-        for item in self.tasks:
-            if res['id'] == item['id']:
-                element = item
-                break
+        for res in self.results:
+            try:
+                if task['_id'] == res['_id']:
+                    element = res
+                    break
+            except KeyError:
+                continue
         return element
 
     def analyze_results(self):
