@@ -1,3 +1,7 @@
+"""Blaster blast.
+
+The blast module contains the main blaster class to run.
+"""
 from copy import deepcopy
 from multiprocessing import Queue
 from pprint import pformat

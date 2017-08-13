@@ -1,3 +1,7 @@
+"""Blaster setup.
+
+The blaster setup module commonly containing Python packaging code.
+"""
 from os.path import dirname, join
 from re import compile
 

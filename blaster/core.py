@@ -1,3 +1,7 @@
+"""Blaster core.
+
+The core module contains commonly used classes and functions by blaster.
+"""
 from inspect import getmodule, stack
 from logging import Formatter, getLogger, StreamHandler
 from time import time

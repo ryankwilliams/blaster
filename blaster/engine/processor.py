@@ -1,3 +1,8 @@
+"""Blaster processor.
+
+The processor module contains the main class which handles running tasks
+using the built-in Python multiprocessing library.
+"""
 from multiprocessing import Process
 from traceback import print_exc
 
