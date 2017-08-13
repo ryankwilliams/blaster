@@ -1,3 +1,4 @@
+from copy import deepcopy
 from multiprocessing import Process, Queue
 from pprint import pformat
 from time import sleep
@@ -7,7 +8,6 @@ from uuid import uuid4
 from . import BlasterError
 from .constants import REQ_TASK_KEYS
 from .core import CalcTimeMixin, LoggerMixin
-from copy import deepcopy
 
 
 class Processor(Process):
