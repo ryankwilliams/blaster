@@ -1,4 +1,3 @@
-from .core import BlasterError
-from .worker import Blaster
+from .blast import Blaster
 
 __version__ = '0.1.1'
