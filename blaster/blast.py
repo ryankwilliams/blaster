@@ -13,8 +13,6 @@ from .core import BlasterError
 from .core import CalcTimeMixin, LoggerMixin
 from .engine.processor import Processor
 
-__version__ = '0.1.1'
-
 
 class Blaster(LoggerMixin, CalcTimeMixin):
     """Blaster's main class."""
