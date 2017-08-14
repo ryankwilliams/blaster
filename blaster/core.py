@@ -84,7 +84,13 @@ class TaskDefinition(dict):
     """Task definition."""
 
     def __init__(self, *args, **kwargs):
-        """Constructor."""
+        """Constructor.
+
+        :param args: Variable number of arguments.
+        :type args: n/a
+        :param kwargs: Key word arguments.
+        :type kwargs: n/a
+        """
         super(TaskDefinition, self).__init__(*args, **kwargs)
 
     def is_valid(self):
@@ -105,6 +111,7 @@ class ResultsList(list):
     """Results list."""
 
     def __init__(self):
+        """Constructor."""
         super(ResultsList, self).__init__()
 
     def analyze(self):
