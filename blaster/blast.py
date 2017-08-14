@@ -9,7 +9,7 @@ from time import sleep
 from uuid import uuid4
 
 from .core import BlasterError
-from .core import CalcTimeMixin, LoggerMixin, TaskDefinition
+from .core import CalcTimeMixin, LoggerMixin, ResultsList, TaskDefinition
 from .engine.processor import Processor
 
 
@@ -26,7 +26,7 @@ class Blaster(LoggerMixin, CalcTimeMixin):
         """
         self.tasks = tasks
         self.processes = list()
-        self.results = list()
+        self.results = ResultsList()
         self.queue = Queue()
         self.create_blaster_logger(log_level.lower())
 
@@ -92,7 +92,7 @@ class Blaster(LoggerMixin, CalcTimeMixin):
 
             # correlate the results with initial tasks
             for task in self.tasks:
-                data = self.map_task_to_results(task)
+                data = self.results.coordinate(task)
                 task.pop('_id')
                 data.pop('_id')
                 for key, value in data.items():
@@ -107,7 +107,7 @@ class Blaster(LoggerMixin, CalcTimeMixin):
 
             # correlate the results with initial tasks
             for task in self.tasks:
-                data = self.map_task_to_results(task)
+                data = self.results.coordinate(task)
                 task.pop('_id')
                 data.pop('_id')
                 for key, value in data.items():
@@ -139,39 +139,10 @@ class Blaster(LoggerMixin, CalcTimeMixin):
             self.logger.info('.' * 30)
 
             # handle the return
-            if raise_on_failure and self.analyze_results():
+            if raise_on_failure and self.results.analyze():
                 raise BlasterError(
                     'One or more tasks got a status of non zero.',
                     results=self.results
                 )
             else:
                 return self.results
-
-    def map_task_to_results(self, task):
-        """Map the task to the one defined in the results. This is needed to
-        correlate the data.
-
-        :param task: Task element.
-        :type task: dict
-        :return: The matching resource element.
-        :rtype: dict
-        """
-        element = None
-
-        for res in self.results:
-            try:
-                if task['_id'] == res['_id']:
-                    element = res
-                    break
-            except KeyError:
-                continue
-        return element
-
-    def analyze_results(self):
-        """Analyze the results to determine overall status."""
-        status = 0
-        for item in self.results:
-            if item['status'] != 0:
-                status = 1
-                break
-        return status
