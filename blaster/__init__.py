@@ -1,4 +1,7 @@
-from .core import BlasterError
-from .worker import Blaster
+"""Blaster.
+
+The blaster package.
+"""
+from .blast import Blaster
 
 __version__ = '0.1.1'

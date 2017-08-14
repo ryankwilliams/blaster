@@ -1,8 +1,12 @@
+"""Blaster core.
+
+The core module contains commonly used classes and functions by blaster.
+"""
 from inspect import getmodule, stack
 from logging import Formatter, getLogger, StreamHandler
 from time import time
 
-from .constants import LOG_FORMAT, LOG_LEVELS
+from .constants import LOG_FORMAT, LOG_LEVELS, REQ_TASK_KEYS
 
 LOG = getLogger(__name__)
 
@@ -74,3 +78,60 @@ class CalcTimeMixin(object):
         minutes = elapsed // 60
         seconds = elapsed - 60 * minutes
         return hours, minutes, seconds
+
+
+class TaskDefinition(dict):
+    """Task definition."""
+
+    def __init__(self, *args, **kwargs):
+        """Constructor.
+
+        :param args: Variable number of arguments.
+        :type args: n/a
+        :param kwargs: Key word arguments.
+        :type kwargs: n/a
+        """
+        super(TaskDefinition, self).__init__(*args, **kwargs)
+
+    def is_valid(self):
+        """Ensure the task definition is valid.
+
+        :return: Whether required keys are set.
+        :rtype: bool
+        """
+        count = 0
+        for key in REQ_TASK_KEYS:
+            if key not in self:
+                LOG.error('Req. key %s missing from task definition!' % key)
+                count += 1
+        return True if count == 0 else False
+
+
+class ResultsList(list):
+    """Results list."""
+
+    def __init__(self):
+        """Constructor."""
+        super(ResultsList, self).__init__()
+
+    def analyze(self):
+        """Analyze the list of results based on overall task status.
+
+        :return: Whether task run was pass or fail.
+        :rtype: int
+        """
+        for item in self:
+            if item['status'] != 0:
+                return 1
+        return 0
+
+    def coordinate(self, task):
+        """Coordinate and update the list of results with their corresponding
+        task definitions.
+        """
+        for item in self:
+            try:
+                if item['_id'] == task['_id']:
+                    return item
+            except KeyError as ex:
+                raise KeyError(ex)

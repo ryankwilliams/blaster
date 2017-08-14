@@ -1,3 +1,7 @@
+"""Blaster constants.
+
+The constants module contains commonly used constants by blaster.
+"""
 from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING
 
 LOG_LEVELS = {
