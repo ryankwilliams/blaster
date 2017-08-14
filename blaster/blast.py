@@ -8,10 +8,10 @@ from pprint import pformat
 from time import sleep
 from uuid import uuid4
 
-from .constants import REQ_TASK_KEYS
 from .core import BlasterError
 from .core import CalcTimeMixin, LoggerMixin
 from .engine.processor import Processor
+from .helper import TaskDefinition
 
 
 class Blaster(LoggerMixin, CalcTimeMixin):
@@ -30,22 +30,6 @@ class Blaster(LoggerMixin, CalcTimeMixin):
         self.results = list()
         self.queue = Queue()
         self.create_blaster_logger(log_level.lower())
-
-    def validate_task_def(self, task_def):
-        """Validate a task definition to ensure required keys are set.
-
-        :param task_def: The task definition.
-        :type task_def: dict
-        :return: Whether required keys are set.
-        :rtype: bool
-        """
-        count = 0
-        for key in REQ_TASK_KEYS:
-            if key not in task_def:
-                self.logger.error('Missing key: %s from task definition' % key)
-                count += 1
-
-        return True if count == 0 else False
 
     def blastoff(self, raise_on_failure=False):
         """Blast off a list of tasks concurrently calling each tasks methods
@@ -67,12 +51,11 @@ class Blaster(LoggerMixin, CalcTimeMixin):
         self.logger.debug('Start: building processes..')
         for index, task in enumerate(self.tasks):
             index += 1
+            task = TaskDefinition(task)
 
-            # check if required task definition keys exist
-            if not self.validate_task_def(task):
-                raise BlasterError(
-                    'Not all required keys are defined for task definition.'
-                )
+            # task definition valid?
+            if not task.is_valid():
+                raise BlasterError('Req. keys missing for task definition.')
 
             # generate random unique id
             task['_id'] = str(uuid4())
