@@ -6,7 +6,7 @@ from inspect import getmodule, stack
 from logging import Formatter, getLogger, StreamHandler
 from time import time
 
-from .constants import LOG_FORMAT, LOG_LEVELS
+from .constants import LOG_FORMAT, LOG_LEVELS, REQ_TASK_KEYS
 
 LOG = getLogger(__name__)
 
@@ -78,3 +78,24 @@ class CalcTimeMixin(object):
         minutes = elapsed // 60
         seconds = elapsed - 60 * minutes
         return hours, minutes, seconds
+
+
+class TaskDefinition(dict):
+    """Task definition."""
+
+    def __init__(self, *args, **kwargs):
+        """Constructor."""
+        super(TaskDefinition, self).__init__(*args, **kwargs)
+
+    def is_valid(self):
+        """Ensure the task definition is valid.
+
+        :return: Whether required keys are set.
+        :rtype: bool
+        """
+        count = 0
+        for key in REQ_TASK_KEYS:
+            if key not in self:
+                LOG.error('Req. key %s missing from task definition!' % key)
+                count += 1
+        return True if count == 0 else False

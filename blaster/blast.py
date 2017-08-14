@@ -9,9 +9,8 @@ from time import sleep
 from uuid import uuid4
 
 from .core import BlasterError
-from .core import CalcTimeMixin, LoggerMixin
+from .core import CalcTimeMixin, LoggerMixin, TaskDefinition
 from .engine.processor import Processor
-from .helper import TaskDefinition
 
 
 class Blaster(LoggerMixin, CalcTimeMixin):
