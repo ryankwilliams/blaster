@@ -5,7 +5,7 @@ The blaster setup module commonly containing Python packaging code.
 from os.path import dirname, join
 from re import compile
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def version():
@@ -24,6 +24,7 @@ setup(
     author='Ryan Williams',
     author_email='rwilliams5262@gmail.com',
     license='GPLv3',
-    packages=['blaster'],
+    package_dir={'': '.'},
+    packages=find_packages('.'),
     zip_safe=False
 )
