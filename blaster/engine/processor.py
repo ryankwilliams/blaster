@@ -26,14 +26,14 @@ class Processor(Process):
     def run(self):
         """Run the task methods."""
         for task_def in iter(self.input.get, 'STOP'):
-            task_id = task_def['_id']
+            task_id = task_def['bid']
             task_name = task_def['name']
             task_cls = task_def.pop('task')
             methods = task_def.pop('methods')
 
             # results template
             results = dict(
-                _id=task_id,
+                bid=task_id,
                 name=task_name,
                 task=task_cls,
                 methods=list()
