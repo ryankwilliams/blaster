@@ -131,7 +131,7 @@ class ResultsList(list):
         """
         for item in self:
             try:
-                if item['_id'] == task['_id']:
+                if item['bid'] == task['bid']:
                     return item
             except KeyError as ex:
                 raise KeyError(ex)

@@ -62,7 +62,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
                 raise BlasterError('Req. keys missing for task definition.')
 
             # generate random unique id
-            task['_id'] = str(uuid4())
+            task['bid'] = str(uuid4())
 
             self.logger.info('%s. TASK ~ %s, METHODS: %s' %
                              (index, task['task'].__name__, task['methods']))
@@ -112,8 +112,6 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             # correlate the results with initial tasks
             for task in self.updated_tasks:
                 data = self.results.coordinate(task)
-                task.pop('_id')
-                data.pop('_id')
                 for key, value in data.items():
                     if key in task:
                         task[key] = value
@@ -125,8 +123,6 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             # correlate the results with initial tasks
             for task in self.updated_tasks:
                 data = self.results.coordinate(task)
-                task.pop('_id')
-                data.pop('_id')
                 for key, value in data.items():
                     if key in task:
                         task[key] = value
