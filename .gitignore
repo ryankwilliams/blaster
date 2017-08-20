@@ -6,3 +6,8 @@
 *.egg-info
 dist
 build
+
+# Tests
+.coverage
+.tox
+tests/coverage
