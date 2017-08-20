@@ -1,5 +1,7 @@
 # Blaster
 
+[![Build Status](https://travis-ci.org/rywillia/blaster.svg?branch=master)](https://travis-ci.org/rywillia/blaster)
+
 Blaster is a library that provides the ability to blast off a list of tasks
 and call each of their given methods concurrently. Blaster uses Python's
 built-in multiprocessing library to run the list of tasks.
