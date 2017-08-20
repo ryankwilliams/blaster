@@ -1,4 +1,4 @@
-.PHONY: clean-pyc clean clean-tests tox
+.PHONY: clean-pyc clean clean-tests tests tox
 
 all: clean-pyc clean clean-tests
 
