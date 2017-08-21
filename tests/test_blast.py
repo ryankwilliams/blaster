@@ -1,3 +1,7 @@
+"""Blaster blast (tests).
+
+Test cases to test the blaster blast module.
+"""
 from nose.tools import assert_true
 
 
