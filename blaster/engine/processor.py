@@ -36,8 +36,7 @@ class Processor(Process):
                 bid=task_id,
                 name=task_name,
                 task=task_cls,
-                methods=list(),
-                rvalue=None
+                methods=list()
             )
 
             try:
