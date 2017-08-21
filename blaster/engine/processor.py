@@ -36,7 +36,8 @@ class Processor(Process):
                 bid=task_id,
                 name=task_name,
                 task=task_cls,
-                methods=list()
+                methods=list(),
+                rvalue=None
             )
 
             try:
@@ -46,12 +47,13 @@ class Processor(Process):
                 # run through task methods sequentially
                 for method in methods:
                     # call method
-                    getattr(task_obj, method)()
+                    value = getattr(task_obj, method)()
 
                     # put method call results into queue
                     results['methods'].append(dict(
                         name=method,
-                        status=0
+                        status=0,
+                        rvalue=value
                     ))
 
                 # put overall status
@@ -65,6 +67,7 @@ class Processor(Process):
                     results['methods'].append(dict(
                         name=method,
                         status=1,
+                        rvalue=None,
                         traceback=format_tb(exc_data[2])
                     ))
                 except UnboundLocalError:
@@ -83,6 +86,7 @@ class Processor(Process):
                 results['methods'].append(dict(
                     name=method,
                     status=1,
+                    rvalue=None,
                     traceback=format_tb(exc_data[2])
                 ))
 
