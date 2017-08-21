@@ -44,9 +44,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         :return: Content from task method calls.
         :rtype: list
         """
-        self.logger.info('.' * 30)
-        self.logger.info('START: BLASTER PREPARATION')
-        self.logger.info('.' * 30)
+        self.logger.info('Start blaster preparation.')
 
         # save start time
         self.start()
@@ -64,36 +62,29 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             # generate random unique id
             task['bid'] = str(uuid4())
 
-            self.logger.info('%s. TASK ~ %s, METHODS: %s' %
+            self.logger.info('%s. task: %s, methods: %s' %
                              (index, task['task'].__name__, task['methods']))
 
             # add updated task to list
             self.updated_tasks.append(task)
-
-        self.logger.info('.' * 30)
-        self.logger.info('END: BLASTER PREPARATION')
-        self.logger.info('.' * 30)
+        self.logger.info('End blaster preparation.')
 
         # submit tasks to queue
         for task in self.updated_tasks:
             self.task_queue.put(task)
 
-        self.logger.info('.' * 30)
-        self.logger.info('START: BLASTER BLAST OFF')
-        self.logger.info('.' * 30)
+        self.logger.info('Start blaster.')
 
         # determine number of processes to start based on total tasks
         if len(self.updated_tasks) >= 10:
-            NUMBER_OF_PROCESSES = 10
+            process_count = 10
         else:
-            NUMBER_OF_PROCESSES = len(self.updated_tasks)
+            process_count = len(self.updated_tasks)
 
-        self.logger.info(
-            'Total processes used by blaster is %s.' % NUMBER_OF_PROCESSES
-        )
+        self.logger.debug('Total processes to run tasks: %s.' % process_count)
 
         # create worker processes
-        for i in range(NUMBER_OF_PROCESSES):
+        for i in range(process_count):
             self.processes.append(Processor(self.task_queue, self.done_queue))
 
         # start worker processes
@@ -106,7 +97,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
                 self.results.append(self.done_queue.get())
 
             # stop worker processes
-            for i in range(NUMBER_OF_PROCESSES):
+            for i in range(process_count):
                 self.task_queue.put('STOP')
 
             # correlate the results with initial tasks
@@ -142,10 +133,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             hour, minutes, seconds = self.delta()
             self.logger.info('Total blast off duration: %dh:%dm:%ds' %
                              (hour, minutes, seconds))
-
-            self.logger.info('.' * 30)
-            self.logger.info('END: BLASTER BLAST OFF')
-            self.logger.info('.' * 30)
+            self.logger.info('End blaster.')
 
             # handle the return
             if raise_on_failure and self.results.analyze():
