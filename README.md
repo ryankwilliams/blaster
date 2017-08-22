@@ -1,6 +1,7 @@
 # Blaster
 
 [![Build Status](https://travis-ci.org/rywillia/blaster.svg?branch=master)](https://travis-ci.org/rywillia/blaster)
+[![codecov](https://codecov.io/gh/rywillia/blaster/branch/master/graph/badge.svg)](https://codecov.io/gh/rywillia/blaster)
 [![PyPI version](https://img.shields.io/pypi/v/blaster.svg)](https://pypi.python.org/pypi/blaster)
 
 Blaster is a library that provides the ability to blast off a list of tasks
