@@ -16,7 +16,7 @@ tests:
 	rm -rf .coverage
 	rm -rf .tox
 	rm -rf tests/coverage
-	tox
+	tox -e py27
 
 tests-py27:
 	rm -rf .coverage
