@@ -11,7 +11,11 @@ from .engine.processor import Processor
 
 
 class Blaster(CalcTimeMixin, LoggerMixin):
-    """Blaster's main class."""
+    """Blast a list of tasks concurrently.
+
+    The primary focus of this class is to processes a list of tasks given as
+    input and run them all concurrently.
+    """
 
     def __init__(self, tasks, log_level='info'):
         """Constructor.
@@ -49,8 +53,13 @@ class Blaster(CalcTimeMixin, LoggerMixin):
                     task[key] = value
 
     def blastoff(self, raise_on_failure=False):
-        """Blast off a list of tasks concurrently calling each tasks methods
-        defined.
+        """Blast off tasks concurrently call their defined methods.
+
+        Each task has a list of methods to execute. This method will create
+        x amount of processes (start them) and then begin to add the tasks to
+        a queue. It will begin to process the tasks and run their methods they
+        have defined. Once all tasks are finsihed in the queue, it will handle
+        the results and return them back to the user.
 
         :param raise_on_failure: Whether to raise exception on failure.
         :type raise_on_failure: bool

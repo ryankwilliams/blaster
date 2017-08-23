@@ -12,7 +12,7 @@ LOG = getLogger(__name__)
 
 
 class BlasterError(Exception):
-    """Blaster's base exception class."""
+    """Blaster's base error to raise."""
 
     def __init__(self, message, results=list()):
         """Constructor.
@@ -71,6 +71,7 @@ class CalcTimeMixin(object):
         """Calculate time delta between start and end times.
 
         :return: Hours, minutes, seconds
+        :rtype: int
         """
         elapsed = self._end_time - self._start_time
         hours = elapsed // 3600
@@ -81,7 +82,7 @@ class CalcTimeMixin(object):
 
 
 class TaskDefinition(dict):
-    """Task definition."""
+    """The standard definition of a blaster task."""
 
     def __init__(self, *args, **kwargs):
         """Constructor.
@@ -108,7 +109,7 @@ class TaskDefinition(dict):
 
 
 class ResultsList(list):
-    """Results list."""
+    """The standard results for a blaster run."""
 
     def __init__(self):
         """Constructor."""
@@ -126,8 +127,12 @@ class ResultsList(list):
         return 0
 
     def coordinate(self, task):
-        """Coordinate and update the list of results with their corresponding
-        task definitions.
+        """Update results with their corresponding task definitions.
+
+        :param task: Task definition to compare too.
+        :type task: dict
+        :return: Matching result task to the task given.
+        :rtype: dict
         """
         for item in self:
             try:

@@ -9,7 +9,7 @@ LOG = getLogger('blaster')
 
 
 class InvalidCar(object):
-    """Class to build a invalid car."""
+    """Build an invalid car."""
 
     def __init__(self, **kwargs):
         """Constructor."""
@@ -17,11 +17,13 @@ class InvalidCar(object):
 
     @staticmethod
     def exterior():
+        """Build the car's exterior."""
         LOG.info('Build exterior.')
         raise Exception('Unable to build exterior today.')
         sleep(1)
 
     @staticmethod
     def interior():
+        """Build the car's interior."""
         LOG.info('Build interior')
         sleep(1)
