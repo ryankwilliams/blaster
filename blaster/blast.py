@@ -35,6 +35,19 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         # create blaster logger
         self.create_blaster_logger(log_level.lower())
 
+    def get_results(self):
+        """Get results for tasks in the queue."""
+        for i in range(len(self.updated_tasks)):
+            self.results.append(self.done_queue.get())
+
+    def correlate_data(self):
+        """Correlate the task definition to its results data."""
+        for task in self.updated_tasks:
+            data = self.results.coordinate(task)
+            for key, value in data.items():
+                if key in task:
+                    task[key] = value
+
     def blastoff(self, raise_on_failure=False):
         """Blast off a list of tasks concurrently calling each tasks methods
         defined.
@@ -92,31 +105,21 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             p.start()
 
         try:
-            # get status
-            for i in range(len(self.updated_tasks)):
-                self.results.append(self.done_queue.get())
+            # get status/results
+            self.get_results()
 
             # stop worker processes
             for i in range(process_count):
                 self.task_queue.put('STOP')
 
             # correlate the results with initial tasks
-            for task in self.updated_tasks:
-                data = self.results.coordinate(task)
-                for key, value in data.items():
-                    if key in task:
-                        task[key] = value
+            self.correlate_data()
         except KeyboardInterrupt:
-            # get status
-            for i in range(len(self.updated_tasks)):
-                self.results.append(self.done_queue.get())
+            # get status/results
+            self.get_results()
 
             # correlate the results with initial tasks
-            for task in self.updated_tasks:
-                data = self.results.coordinate(task)
-                for key, value in data.items():
-                    if key in task:
-                        task[key] = value
+            self.correlate_data()
 
             # terminate processes
             for p in self.processes:
