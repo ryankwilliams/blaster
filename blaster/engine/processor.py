@@ -8,8 +8,8 @@ from sys import exc_info
 from traceback import format_tb, print_exc
 
 
-class Processor(Process):
-    """Processor class to handle calling all methods for a given task."""
+class BlasterParallel(Process):
+    """Blaster parallel class to call all methods for a given task."""
 
     def __init__(self, in_queue, out_queue):
         """Constructor.
@@ -19,7 +19,7 @@ class Processor(Process):
         :param out_queue: Output queue.
         :type out_queue: object
         """
-        super(Processor, self).__init__()
+        super(BlasterParallel, self).__init__()
         self.input = in_queue
         self.output = out_queue
 
