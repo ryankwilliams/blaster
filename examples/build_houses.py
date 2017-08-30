@@ -124,8 +124,18 @@ if __name__ == '__main__':
     # create blaster object
     blast = Blaster(tasks)
 
-    # blast off tasks
+    # blast off tasks in parallel
     data = blast.blastoff()
+
+    # log results
+    sleep(2)
+    pprint(data, indent=4)
+
+    # create blaster object
+    blast = Blaster(tasks)
+
+    # blast off tasks in sequential
+    data = blast.blastoff(serial=True)
 
     # log results
     sleep(2)

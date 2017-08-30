@@ -7,14 +7,14 @@ from uuid import uuid4
 
 from .core import BlasterError
 from .core import CalcTimeMixin, LoggerMixin, ResultsList, TaskDefinition
-from .engine.processor import Processor
+from .engine import BlasterParallel, BlasterSerial
 
 
 class Blaster(CalcTimeMixin, LoggerMixin):
-    """Blast a list of tasks concurrently.
+    """Blast a list of tasks concurrently or sequentially..
 
     The primary focus of this class is to processes a list of tasks given as
-    input and run them all concurrently.
+    input and run its defined methods.
     """
 
     def __init__(self, tasks, log_level='info'):
@@ -52,7 +52,25 @@ class Blaster(CalcTimeMixin, LoggerMixin):
                 if key in task:
                     task[key] = value
 
-    def blastoff(self, raise_on_failure=False):
+    def blastoff(self, serial=False, raise_on_failure=False):
+        """Blast off tasks concurrently or sequentially calling their defined
+        methods.
+
+        :param serial: Whether to run tasks sequentially. (default = parallel)
+        :type serial: bool
+        :param raise_on_failure: Whether to raise exception on failure.
+        :type raise_on_failure: bool
+        :return: Content from task method calls.
+        :rtype: list
+        """
+        if serial:
+            # serial task runs
+            return self.serial(raise_on_failure)
+        else:
+            # parallel task runs
+            return self.parallel(raise_on_failure)
+
+    def parallel(self, raise_on_failure):
         """Blast off tasks concurrently call their defined methods.
 
         Each task has a list of methods to execute. This method will create
@@ -107,7 +125,9 @@ class Blaster(CalcTimeMixin, LoggerMixin):
 
         # create worker processes
         for i in range(process_count):
-            self.processes.append(Processor(self.task_queue, self.done_queue))
+            self.processes.append(
+                BlasterParallel(self.task_queue, self.done_queue)
+            )
 
         # start worker processes
         for p in self.processes:
@@ -155,3 +175,61 @@ class Blaster(CalcTimeMixin, LoggerMixin):
                 )
             else:
                 return self.results
+
+    def serial(self, raise_on_failure):
+        """Blast off tasks sequentially calling their defined methods.
+
+        :param serial: Whether to run tasks sequentially. (default = parallel)
+        :type serial: bool
+        :param raise_on_failure: Whether to raise exception on failure.
+        :type raise_on_failure: bool
+        :return: Content from task method calls.
+        :rtype: list
+        """
+        self.logger.info('Start blaster preparation.')
+
+        # save start time
+        self.start()
+
+        # build updated task list
+        self.logger.debug('Reviewing tasks to ensure proper keys are defined.')
+        for index, task in enumerate(self.tasks):
+            index += 1
+            task = TaskDefinition(task)
+
+            # task definition valid?
+            if not task.is_valid():
+                raise BlasterError('Req. keys missing for task definition.')
+
+            # generate random unique id
+            task['bid'] = str(uuid4())
+
+            self.logger.info('%s. task: %s, methods: %s' %
+                             (index, task['task'].__name__, task['methods']))
+            # add updated task to list
+            self.updated_tasks.append(task)
+        self.logger.info('End blaster preparation.')
+
+        self.logger.info('Start blaster.')
+
+        for task in self.updated_tasks:
+            bserial = BlasterSerial(task, self.results)
+            bserial.run()
+
+        # save end time
+        self.end()
+
+        # calculate time delta
+        hour, minutes, seconds = self.delta()
+        self.logger.info('Total blast off duration: %dh:%dm:%ds' %
+                         (hour, minutes, seconds))
+        self.logger.info('End blaster.')
+
+        # handle the return
+        if raise_on_failure and self.results.analyze():
+            raise BlasterError(
+                'One or more tasks got a status of non zero.',
+                results=self.results
+            )
+        else:
+            return self.results
