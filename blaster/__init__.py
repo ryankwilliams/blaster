@@ -5,4 +5,4 @@ The blaster package.
 from .blast import Blaster
 from .core import BlasterError
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
