@@ -2,5 +2,5 @@
 
 The blaster engine package.
 """
-from .processor import BlasterParallel
+from .parallel import BlasterParallel
 from .serial import BlasterSerial

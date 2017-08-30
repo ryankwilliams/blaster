@@ -1,7 +1,7 @@
-"""Blaster processor.
+"""Blaster parallel.
 
-The processor module contains the main class which handles running tasks
-using the built-in Python multiprocessing library.
+The parallel module contains the main class which handles running tasks in
+parallel (concurrently). It uses the built-in Python multiprocessing library.
 """
 from multiprocessing import Process
 from sys import exc_info
