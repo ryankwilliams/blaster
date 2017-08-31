@@ -4,11 +4,12 @@ The serial module contains the main class which handles running tasks in
 serial (sequentially - aka one by one). This can be used over the main
 functionality of running tasks concurrently (default behavior for blaster).
 """
-from sys import exc_info
-from traceback import format_tb, print_exc
+from traceback import format_tb
+
+from ..core import EngineMixin
 
 
-class BlasterSerial(object):
+class BlasterSerial(EngineMixin):
     """Blaster serial class to call all methods for a given task."""
 
     def __init__(self, task_def, output):
@@ -89,13 +90,3 @@ class BlasterSerial(object):
 
             # put results into queue
             self.output.append(results)
-
-    @staticmethod
-    def get_traceback():
-        """Get traceback when exception is raised. Will log traceback as well.
-
-        :return: Exception information.
-        :rtype: tuple
-        """
-        print_exc()
-        return exc_info()

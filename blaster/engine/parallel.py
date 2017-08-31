@@ -4,11 +4,12 @@ The parallel module contains the main class which handles running tasks in
 parallel (concurrently). It uses the built-in Python multiprocessing library.
 """
 from multiprocessing import Process
-from sys import exc_info
-from traceback import format_tb, print_exc
+from traceback import format_tb
+
+from ..core import EngineMixin
 
 
-class BlasterParallel(Process):
+class BlasterParallel(EngineMixin, Process):
     """Blaster parallel class to call all methods for a given task."""
 
     def __init__(self, in_queue, out_queue):
@@ -97,13 +98,3 @@ class BlasterParallel(Process):
 
                 # put results into queue
                 self.output.put(results)
-
-    @staticmethod
-    def get_traceback():
-        """Get traceback when exception is raised. Will log traceback as well.
-
-        :return: Exception information.
-        :rtype: tuple
-        """
-        print_exc()
-        return exc_info()
