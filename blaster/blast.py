@@ -183,8 +183,6 @@ class Blaster(CalcTimeMixin, LoggerMixin):
     def serial(self, raise_on_failure):
         """Blast off tasks sequentially calling their defined methods.
 
-        :param serial: Whether to run tasks sequentially. (default = parallel)
-        :type serial: bool
         :param raise_on_failure: Whether to raise exception on failure.
         :type raise_on_failure: bool
         :return: Content from task method calls.
