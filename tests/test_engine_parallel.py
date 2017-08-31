@@ -1,6 +1,6 @@
-"""Blaster engine.processor (tests).
+"""Blaster engine.parallel (tests).
 
-Test cases to test the blaster engine processor module.
+Test cases to test the blaster engine parallel module.
 """
 from multiprocessing import Queue
 
@@ -11,19 +11,19 @@ from examples.invalid import InvalidCar
 from examples.valid import ValidCar
 
 
-class TestEngineProcessor(object):
-    """Unit tests to cover engine.process module.
+class TestEngineParallel(object):
+    """Unit tests to cover engine.parallel module.
 
     Class provides both positive and negative tests to gain better code
     coverage.
     """
 
-    def test_create_processor_object(self):
-        """Create process object.
+    def test_create_parallel_object(self):
+        """Create parallel object.
 
-        This method tests creating a processor object from the Processor
+        This method tests creating a parallel object from the Parallel
         class. Once the object is created, it will verify it is an instance of
-        the Processor class.
+        the Parallel class.
         """
         processor = BlasterParallel(list(), list())
         assert_is_instance(processor, BlasterParallel)
@@ -31,16 +31,16 @@ class TestEngineProcessor(object):
     def test_get_traceback(self):
         """Get traceback information.
 
-        This method tests the processor class method to get traceback
+        This method tests the parallel class method to get traceback
         information. It will verify the data type returned is a tuple.
         """
-        processor = BlasterParallel(list(), list())
-        assert_is_instance(processor.get_traceback(), tuple)
+        parallel = BlasterParallel(list(), list())
+        assert_is_instance(parallel.get_traceback(), tuple)
 
     def test_valid_run(self):
-        """Call the processor class run method.
+        """Call the parallel class run method.
 
-        This method tests the processor run method. (positive test)
+        This method tests the parallel run method. (positive test)
         """
         # create queues
         in_queue = Queue()
@@ -56,13 +56,13 @@ class TestEngineProcessor(object):
             }
         )
         in_queue.put('STOP')
-        processor = BlasterParallel(in_queue, out_queue)
-        processor.run()
+        parallel = BlasterParallel(in_queue, out_queue)
+        parallel.run()
 
     def test_invalid_run(self):
-        """Call the processor class run method.
+        """Call the parallel class run method.
 
-        This method tests the process run method. (negative test)
+        This method tests the parallel run method. (negative test)
         """
         # create queues
         in_queue = Queue()
@@ -78,5 +78,5 @@ class TestEngineProcessor(object):
             }
         )
         in_queue.put('STOP')
-        processor = BlasterParallel(in_queue, out_queue)
-        processor.run()
+        parallel = BlasterParallel(in_queue, out_queue)
+        parallel.run()

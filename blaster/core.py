@@ -4,7 +4,9 @@ The core module contains commonly used classes and functions by blaster.
 """
 from inspect import getmodule, stack
 from logging import Formatter, getLogger, StreamHandler
+from sys import exc_info
 from time import time
+from traceback import print_exc
 
 from .constants import LOG_FORMAT, LOG_LEVELS, REQ_TASK_KEYS
 
@@ -140,3 +142,22 @@ class ResultsList(list):
                     return item
             except KeyError as ex:
                 raise KeyError(ex)
+
+
+class EngineMixin(object):
+    """The standard blaster engine mixin class.
+
+    The primary purpose of this mixin class is to provide blaster engine
+    classes with commonly used methods. It removes the need to duplicate
+    code between engine modules.
+    """
+
+    @staticmethod
+    def get_traceback():
+        """Get traceback when exception is raised. Will log traceback as well.
+
+        :return: Exception information.
+        :rtype: tuple
+        """
+        print_exc()
+        return exc_info()

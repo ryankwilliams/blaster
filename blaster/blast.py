@@ -27,9 +27,9 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         """
         self.tasks = tasks
 
-        # create queues
-        self.task_queue = Queue()
-        self.done_queue = Queue()
+        # set queue attributes (not initialized)
+        self.task_queue = None
+        self.done_queue = None
 
         # set list attributes
         self.updated_tasks = list()
@@ -84,6 +84,10 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         :return: Content from task method calls.
         :rtype: list
         """
+        # create queues
+        self.task_queue = Queue()
+        self.done_queue = Queue()
+
         self.logger.info('Start blaster preparation.')
 
         # save start time

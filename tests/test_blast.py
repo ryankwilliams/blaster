@@ -28,8 +28,62 @@ class TestBlast(object):
         assert_is_instance(blaster, Blaster)
 
     @staticmethod
-    def test_valid_blastoff():
-        """Run blaster blastoff method with valid task.
+    def test_valid_blastoff_serial():
+        """Run blaster blastoff method with valid task in sequential.
+
+        This method tests the blaster blastoff method. (positive test)
+        """
+        blaster = Blaster(
+            tasks=[
+                {
+                    'name': 'car',
+                    'task': ValidCar,
+                    'methods': ['exterior', 'interior']
+                }
+            ]
+        )
+        blaster.blastoff(serial=True)
+
+    @staticmethod
+    @raises(BlasterError)
+    def test_blastoff_serial_invalid_task():
+        """Run blaster blastoff method with an invalid task in sequential.
+
+        This method tests the blaster blastoff method. (negative test)
+        """
+        blaster = Blaster(
+            tasks=[
+                {
+                    'task': ValidCar,
+                    'methods': ['exterior', 'interior']
+                }
+            ]
+        )
+        blaster.blastoff(serial=True)
+
+    @staticmethod
+    @raises(BlasterError)
+    def test_blastoff_serial_failure():
+        """Run blaster blastoff method with a task raising a failure in
+        sequential.
+
+        This method tests the blaster blastoff method with a task raising an
+        exception. (negative test)
+        """
+        blaster = Blaster(
+            tasks=[
+                {
+                    'name': 'car',
+                    'task': InvalidCar,
+                    'methods': ['exterior', 'interior']
+                }
+            ]
+        )
+        blaster.blastoff(serial=True, raise_on_failure=True)
+
+    @staticmethod
+    def test_valid_blastoff_parallel():
+        """Run blaster blastoff method with valid task in parallel.
 
         This method tests the blaster blastoff method. (positive test)
         """
@@ -46,8 +100,8 @@ class TestBlast(object):
 
     @staticmethod
     @raises(BlasterError)
-    def test_blastoff_invalid_task():
-        """Run blaster blastoff method with an invalid task.
+    def test_blastoff_parallel_invalid_task():
+        """Run blaster blastoff method with an invalid task in parallel.
 
         This method tests the blaster blastoff method. (negative test)
         """
@@ -63,8 +117,9 @@ class TestBlast(object):
 
     @staticmethod
     @raises(BlasterError)
-    def test_blastoff_failure():
-        """Run blaster blastoff method with a task raising a failure.
+    def test_blastoff_parallel_failure():
+        """Run blaster blastoff method with a task raising a failure in
+        parallel.
 
         This method tests the blaster blastoff method with a task raising an
         exception. (negative test)
