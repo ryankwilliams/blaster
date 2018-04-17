@@ -3,6 +3,7 @@
 The blast module contains the main blaster class to run.
 """
 from multiprocessing import Queue
+from time import sleep
 from uuid import uuid4
 
 from .core import BlasterError
@@ -70,7 +71,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             # parallel task runs
             return self.parallel(raise_on_failure)
 
-    def parallel(self, raise_on_failure):
+    def parallel(self, raise_on_failure, delay=5):
         """Blast off tasks concurrently call their defined methods.
 
         Each task has a list of methods to execute. This method will create
@@ -81,6 +82,8 @@ class Blaster(CalcTimeMixin, LoggerMixin):
 
         :param raise_on_failure: Whether to raise exception on failure.
         :type raise_on_failure: bool
+        :param delay: Duration to delay between starting processes.
+        :type delay: int
         :return: Content from task method calls.
         :rtype: list
         """
@@ -136,6 +139,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         # start worker processes
         for p in self.processes:
             p.start()
+            sleep(delay)
 
         try:
             # get status/results
