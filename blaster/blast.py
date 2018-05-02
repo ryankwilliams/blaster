@@ -218,9 +218,22 @@ class Blaster(CalcTimeMixin, LoggerMixin):
 
         self.logger.info('Start blaster.')
 
-        for task in self.updated_tasks:
+        for index, task in enumerate(self.updated_tasks):
             bserial = BlasterSerial(task, self.results)
             bserial.run()
+
+            # Stop processing tasks if the task failed. The only time tasks
+            # would continue to run is if you are running in parallel. That is
+            # because tasks would not have any correlation between each other.
+            if self.results[index]['status'] != 0:
+                # before exiting we need to add all tasks that were not
+                # executed and set status of say n/a
+                for item in self.updated_tasks:
+                    if item['bid'] == task['bid']:
+                        continue
+                    item['status'] = 'n/a'
+                    self.results.append(dict(item))
+                break
 
         # save end time
         self.end()
