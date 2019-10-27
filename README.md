@@ -1,7 +1,7 @@
 # Blaster
 
-[![Build Status](https://travis-ci.org/rywillia/blaster.svg?branch=master)](https://travis-ci.org/rywillia/blaster)
-[![Coverage Status](https://coveralls.io/repos/github/rywillia/blaster/badge.svg)](https://coveralls.io/github/rywillia/blaster)
+[![Build Status](https://travis-ci.org/ryankwilliams/blaster.svg?branch=master)](https://travis-ci.org/ryankwilliams/blaster)
+[![Coverage Status](https://coveralls.io/repos/github/ryankwilliams/blaster/badge.svg)](https://coveralls.io/github/ryankwilliams/blaster)
 [![PyPI version](https://img.shields.io/pypi/v/blaster.svg)](https://pypi.python.org/pypi/blaster)
 
 Blaster is a library that provides the ability to blast off a list of tasks
