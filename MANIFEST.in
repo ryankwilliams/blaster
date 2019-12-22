@@ -1,4 +1,3 @@
 include LICENSE README.md
-exclude setup.cfg
 prune .git
 prune .gitignore
