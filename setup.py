@@ -20,7 +20,7 @@ setup(
     version=version(),
     description='Blast off a list of tasks concurrently calling each tasks '
                 'methods defined',
-    url='https://github.com/rywillia/blaster',
+    url='https://github.com/ryankwilliams/blaster',
     author='Ryan Williams',
     author_email='rwilliams5262@gmail.com',
     license='GPLv3',
