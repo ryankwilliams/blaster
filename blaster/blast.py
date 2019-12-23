@@ -224,9 +224,9 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         self.logger.info("Tasks:")
 
         for index, task in enumerate(self.updated_tasks, start=1):
-            self.logger.info("""{}. Task    : {}
-                                    Class   : {}
-                                    Methods : {}""".format(
+            self.logger.info("""{}. Task     : {}
+                                Class    : {}
+                                Methods  : {}""".format(
                 index, task['name'], task['task'], task['methods']))
             bserial = BlasterSerial(task, self.results)
             bserial.run()
