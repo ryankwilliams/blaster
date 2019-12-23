@@ -5,6 +5,17 @@ All changes made to this project will be documented here.
 When adding changes, please follow the standards at the link below:
 https://keepachangelog.com/en/1.0.0/
 
+## [0.2.0] - 2019-12-23
+### Added
+- Use bumpversion for making new releases
+- Added changelog file
+
+### Changed
+- Updates to setuptools for packaging/distribution
+- Consolidate common code across both parallel/sequential methods
+- Makefile adjustments
+- Some minor adjustments to project README.md
+
 ## [0.1.8] - 2018-05-02
 ### Fixed
 - Do not process any more tasks if previous tasks fails. This is only when
