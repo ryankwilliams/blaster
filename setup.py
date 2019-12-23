@@ -2,26 +2,14 @@
 
 The blaster setup module commonly containing Python packaging code.
 """
-from os.path import dirname, join
 
 from setuptools import setup, find_packages
 
-
-def get_version():
-    """Return the package version.
-
-    :return: blaster package version
-    :rtype: str
-    """
-    with open(join(dirname(__file__), 'blaster', '__init__.py')) as fp:
-        for line in fp.readlines():
-            if line.startswith("__version__"):
-                return line.split('"' if '"' in line else "'")[1]
-
+from blaster.metadata import __name__, __version__
 
 setup(
-    name='blaster',
-    version=get_version(),
+    name=__name__,
+    version=__version__,
     description='Blast off a list of tasks concurrently calling each tasks '
                 'methods defined',
     url='https://github.com/ryankwilliams/blaster',

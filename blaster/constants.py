@@ -12,10 +12,7 @@ LOG_LEVELS = {
     'critical': CRITICAL
 }
 
-LOG_FORMAT = (
-    "%(asctime)s %(levelname)s "
-    "[%(name)s.%(funcName)s:%(lineno)d] %(message)s"
-)
+LOG_FORMAT = "%(asctime)s %(levelname)s %(message)s"
 
 REQ_TASK_KEYS = [
     'name',
