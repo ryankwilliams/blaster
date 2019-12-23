@@ -9,6 +9,7 @@ from uuid import uuid4
 from .core import BlasterError
 from .core import CalcTimeMixin, LoggerMixin, ResultsList, TaskDefinition
 from .engine import BlasterParallel, BlasterSerial
+from .metadata import __version__
 
 
 class Blaster(CalcTimeMixin, LoggerMixin):
@@ -64,12 +65,69 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         :return: Content from task method calls.
         :rtype: list
         """
+        self.logger.info("--> Blaster v{} <--".format(__version__))
+        self.logger.info("Task Execution: {}".format(
+            "Sequential" if serial else "Concurrent"))
+
         if serial:
             # serial task runs
             return self.serial(raise_on_failure)
         else:
             # parallel task runs
             return self.parallel(raise_on_failure)
+
+    def initialize(self):
+        """Perform initial tasks before processing tasks by blaster."""
+        self.logger.debug("Blaster initializing..")
+
+        # save start time
+        self.start()
+
+        # build updated task list
+        self.logger.debug("Verifying required keys are set.")
+
+        for index, task in enumerate(self.tasks, start=1):
+            # create task definition
+            task = TaskDefinition(task)
+
+            # task definition valid?
+            if not task.is_valid():
+                raise BlasterError("Req. keys missing for task definition.")
+
+            # generate random unique id
+            task['bid'] = str(uuid4())
+
+            self.logger.debug("%s. task: %s, methods: %s" % (
+                index, task['task'].__name__, task['methods']))
+
+            # add updated task to list
+            self.updated_tasks.append(task)
+        self.logger.debug("Blaster initialization complete!")
+
+    def finalize(self, raise_on_failure):
+        """Perform final tasks before ending blaster.
+
+        :param raise_on_failure: Whether to raise exception on failure.
+        :type raise_on_failure: bool
+        :return: blaster's result task list
+        :rtype: list
+        """
+        # save end time
+        self.end()
+
+        # calculate time delta
+        hour, minutes, seconds = self.delta()
+        self.logger.info("BLAST OFF COMPLETE! TOTAL DURATION: %dh:%dm:%ds" %
+                         (hour, minutes, seconds))
+
+        # handle the return
+        if raise_on_failure and self.results.analyze():
+            raise BlasterError(
+                "One or more tasks got a status of non zero.",
+                results=self.results
+            )
+        else:
+            return self.results
 
     def parallel(self, raise_on_failure, delay=5):
         """Blast off tasks concurrently call their defined methods.
@@ -91,36 +149,20 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         self.task_queue = Queue()
         self.done_queue = Queue()
 
-        self.logger.info('Start blaster preparation.')
+        # perform initialization
+        self.initialize()
 
-        # save start time
-        self.start()
-
-        # build updated task list
-        self.logger.debug('Reviewing tasks to ensure proper keys are defined.')
-        for index, task in enumerate(self.tasks):
-            index += 1
-            task = TaskDefinition(task)
-
-            # task definition valid?
-            if not task.is_valid():
-                raise BlasterError('Req. keys missing for task definition.')
-
-            # generate random unique id
-            task['bid'] = str(uuid4())
-
-            self.logger.info('%s. task: %s, methods: %s' %
-                             (index, task['task'].__name__, task['methods']))
-
-            # add updated task to list
-            self.updated_tasks.append(task)
-        self.logger.info('End blaster preparation.')
+        self.logger.info("Tasks:")
 
         # submit tasks to queue
-        for task in self.updated_tasks:
+        for index, task in enumerate(self.updated_tasks, start=1):
+            self.logger.info("""{}. Task     : {}
+                                Class    : {}
+                                Methods  : {}""".format(
+                index, task['name'], task['task'], task['methods']))
             self.task_queue.put(task)
 
-        self.logger.info('Start blaster.')
+        self.logger.info("3..2..1.. BLAST OFF!")
 
         # determine number of processes to start based on total tasks
         if len(self.updated_tasks) >= 10:
@@ -128,7 +170,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         else:
             process_count = len(self.updated_tasks)
 
-        self.logger.debug('Total processes to run tasks: %s.' % process_count)
+        self.logger.debug("Total processes to run tasks: %s." % process_count)
 
         # create worker processes
         for i in range(process_count):
@@ -163,26 +205,10 @@ class Blaster(CalcTimeMixin, LoggerMixin):
                 p.terminate()
                 p.join()
 
-            self.logger.info('Blast off was unable to run all tasks given '
-                             'due to CRTL+C interrupt.')
+            self.logger.info("Blast off was unable to run all tasks given "
+                             "due to CRTL+C interrupt.")
         finally:
-            # save end time
-            self.end()
-
-            # calculate time delta
-            hour, minutes, seconds = self.delta()
-            self.logger.info('Total blast off duration: %dh:%dm:%ds' %
-                             (hour, minutes, seconds))
-            self.logger.info('End blaster.')
-
-            # handle the return
-            if raise_on_failure and self.results.analyze():
-                raise BlasterError(
-                    'One or more tasks got a status of non zero.',
-                    results=self.results
-                )
-            else:
-                return self.results
+            return self.finalize(raise_on_failure)
 
     def serial(self, raise_on_failure):
         """Blast off tasks sequentially calling their defined methods.
@@ -192,63 +218,30 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         :return: Content from task method calls.
         :rtype: list
         """
-        self.logger.info('Start blaster preparation.')
+        # perform initialization
+        self.initialize()
 
-        # save start time
-        self.start()
+        self.logger.info("Tasks:")
 
-        # build updated task list
-        self.logger.debug('Reviewing tasks to ensure proper keys are defined.')
-        for index, task in enumerate(self.tasks):
-            index += 1
-            task = TaskDefinition(task)
-
-            # task definition valid?
-            if not task.is_valid():
-                raise BlasterError('Req. keys missing for task definition.')
-
-            # generate random unique id
-            task['bid'] = str(uuid4())
-
-            self.logger.info('%s. task: %s, methods: %s' %
-                             (index, task['task'].__name__, task['methods']))
-            # add updated task to list
-            self.updated_tasks.append(task)
-        self.logger.info('End blaster preparation.')
-
-        self.logger.info('Start blaster.')
-
-        for index, task in enumerate(self.updated_tasks):
+        for index, task in enumerate(self.updated_tasks, start=1):
+            self.logger.info("""{}. Task    : {}
+                                    Class   : {}
+                                    Methods : {}""".format(
+                index, task['name'], task['task'], task['methods']))
             bserial = BlasterSerial(task, self.results)
             bserial.run()
 
             # Stop processing tasks if the task failed. The only time tasks
             # would continue to run is if you are running in parallel. That is
             # because tasks would not have any correlation between each other.
-            if self.results[index]['status'] != 0:
+            if self.results[index-1]['status'] != 0:
                 # before exiting we need to add all tasks that were not
                 # executed and set status of say n/a
                 for item in self.updated_tasks:
                     if item['bid'] == task['bid']:
                         continue
-                    item['status'] = 'n/a'
+                    item['status'] = "n/a"
                     self.results.append(dict(item))
                 break
 
-        # save end time
-        self.end()
-
-        # calculate time delta
-        hour, minutes, seconds = self.delta()
-        self.logger.info('Total blast off duration: %dh:%dm:%ds' %
-                         (hour, minutes, seconds))
-        self.logger.info('End blaster.')
-
-        # handle the return
-        if raise_on_failure and self.results.analyze():
-            raise BlasterError(
-                'One or more tasks got a status of non zero.',
-                results=self.results
-            )
-        else:
-            return self.results
+        return self.finalize(raise_on_failure)
