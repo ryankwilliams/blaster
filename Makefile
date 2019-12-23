@@ -29,3 +29,15 @@ tests-py36:
 	rm -rf .tox
 	rm -rf tests/coverage
 	tox -e py36
+
+.PHONY: bump-major
+bump-major:
+	bumpversion major --commit
+
+.PHONY: bump-minor
+bump-minor:
+	bumpversion minor --commit
+
+.PHONY: bump-patch
+bump-patch:
+	bumpversion patch --commit
