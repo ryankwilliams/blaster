@@ -6,10 +6,10 @@ parallel (concurrently). It uses the built-in Python multiprocessing library.
 from multiprocessing import Process
 from traceback import format_tb
 
-from ..core import EngineMixin
+from ..core import EngineMixin, LoggerMixin
 
 
-class BlasterParallel(EngineMixin, Process):
+class BlasterParallel(EngineMixin, LoggerMixin, Process):
     """Blaster parallel class to call all methods for a given task."""
 
     def __init__(self, in_queue, out_queue):
@@ -44,17 +44,35 @@ class BlasterParallel(EngineMixin, Process):
                 # initialize object
                 task_obj = task_cls(**task_def)
 
+                def handler(signum, frame):
+                    raise RuntimeError
+
                 # run through task methods sequentially
                 for method in methods:
+                    import signal
+                    signal.signal(signal.SIGALRM, handler)
                     # call method
-                    value = getattr(task_obj, method)()
+                    signal.alarm(2)
+                    try:
+                        value = getattr(task_obj, method)()
 
-                    # put method call results into queue
-                    results['methods'].append(dict(
-                        name=method,
-                        status=0,
-                        rvalue=value
-                    ))
+                        # put method call results into queue
+                        results['methods'].append(dict(
+                            name=method,
+                            status=0,
+                            rvalue=value
+                        ))
+                    except RuntimeError:
+                        self.logger.warning("timeout reached!")
+
+                        # put method call results into queue
+                        results['methods'].append(dict(
+                            name=method,
+                            status=1,
+                            rvalue=-1
+                        ))
+                    finally:
+                        signal.alarm(0)
 
                 # put overall status
                 results.update(dict(status=0))
