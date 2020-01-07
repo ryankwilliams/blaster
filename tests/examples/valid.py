@@ -24,5 +24,5 @@ class ValidCar(object):
     @staticmethod
     def interior():
         """Build the car's interior."""
-        LOG.info('Build interior')
+        LOG.info('Build interior.')
         sleep(1)

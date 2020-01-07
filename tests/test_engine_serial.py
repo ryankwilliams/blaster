@@ -3,11 +3,13 @@
 Test cases to test the blaster engine serial module.
 """
 
+from multiprocessing import Queue
+
 from nose.tools import assert_is_instance
 
-from blaster.engine import BlasterSerial
-from examples.invalid import InvalidCar
-from examples.valid import ValidCar
+from blaster.engine import Engine
+from .examples.invalid import InvalidCar
+from .examples.valid import ValidCar
 
 
 class TestEngineSerial(object):
@@ -24,8 +26,8 @@ class TestEngineSerial(object):
         class. Once the object is created, it will verify it is an instance of
         the Serial class.
         """
-        processor = BlasterSerial(list(), list())
-        assert_is_instance(processor, BlasterSerial)
+        processor = Engine(Queue(), Queue(), True)
+        assert_is_instance(processor, Engine)
 
     def test_get_traceback(self):
         """Get traceback information.
@@ -33,7 +35,7 @@ class TestEngineSerial(object):
         This method tests the serial class method to get traceback
         information. It will verify the data type returned is a tuple.
         """
-        serial = BlasterSerial(list(), list())
+        serial = Engine(Queue(), Queue(), True)
         assert_is_instance(serial.get_traceback(), tuple)
 
     def test_valid_run(self):
@@ -42,7 +44,7 @@ class TestEngineSerial(object):
         This method tests the serial run method. (positive test)
         """
         # output results list
-        output = list()
+        output = Queue()
 
         # create task definition
         task_def = dict(
@@ -51,7 +53,11 @@ class TestEngineSerial(object):
             task=ValidCar,
             methods=['exterior', 'interior']
         )
-        serial = BlasterSerial(task_def, output)
+
+        input_queue = Queue()
+        input_queue.put(task_def)
+
+        serial = Engine(input_queue, output, True)
         serial.run()
 
     def test_invalid_run(self):
@@ -60,7 +66,7 @@ class TestEngineSerial(object):
         This method tests the serial run method. (negative test)
         """
         # output results list
-        output = list()
+        output = Queue()
 
         # create task definition
         task_def = dict(
@@ -69,5 +75,9 @@ class TestEngineSerial(object):
             task=InvalidCar,
             methods=['exterior', 'interior']
         )
-        serial = BlasterSerial(task_def, output)
+
+        input_queue = Queue()
+        input_queue.put(task_def)
+
+        serial = Engine(input_queue, output, True)
         serial.run()
