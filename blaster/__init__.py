@@ -1,4 +1,4 @@
 """Blaster package."""
 
-from .blast import Blaster
-from .core import BlasterError
+from blaster.blast import Blaster
+from blaster.core import BlasterError

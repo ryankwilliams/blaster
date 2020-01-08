@@ -5,7 +5,7 @@ from pprint import pprint
 from time import sleep
 
 from blaster import Blaster
-from house import House
+from examples.house import House
 
 if __name__ == '__main__':
     # list of tasks (houses to be built)

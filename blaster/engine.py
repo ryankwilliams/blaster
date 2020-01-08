@@ -8,7 +8,7 @@ from sys import exc_info
 from traceback import format_tb
 from traceback import print_exc
 
-from .core import LoggerMixin
+from blaster.core import LoggerMixin
 
 
 class Engine(Process, LoggerMixin):

@@ -7,10 +7,9 @@ from multiprocessing import Queue
 from time import sleep
 from uuid import uuid4
 
-from .core import BlasterError
-from .core import CalcTimeMixin, LoggerMixin, ResultsList, TaskDefinition
-from .engine import Engine
-from .metadata import __version__
+from blaster.core import *
+from blaster.engine import Engine
+from blaster.metadata import __version__
 
 
 class Blaster(CalcTimeMixin, LoggerMixin):

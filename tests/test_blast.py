@@ -5,8 +5,8 @@ Test cases to test the blaster blast module.
 from nose.tools import assert_is_instance, raises
 
 from blaster import Blaster, BlasterError
-from .examples.invalid import InvalidCar
-from .examples.valid import ValidCar
+from tests.examples.invalid import InvalidCar
+from tests.examples.valid import ValidCar
 
 
 class TestBlast(object):
