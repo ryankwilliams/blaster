@@ -127,37 +127,6 @@ class TestTaskDefinition(object):
         assert_is_instance(task_def, TaskDefinition)
         assert_true(hasattr(task_def, 'name'))
 
-    @staticmethod
-    def test_valid_task_definition():
-        """Checks if a task definition is valid.
-
-        This method tests if a task definition is valid by calling the
-        is_valid method that each task has.
-        """
-        task_def = TaskDefinition(
-            dict(
-                name='test',
-                task='task',
-                methods=list()
-            )
-        )
-        assert_true(task_def.is_valid())
-
-    @staticmethod
-    def test_invalid_task_definition():
-        """Check if a task definition is invalid.
-
-        This method tests if a task definition is invalid by calling the
-        is_valid method that each task has.
-        """
-        task_def = TaskDefinition(
-            dict(
-                name='test',
-                task='task',
-            )
-        )
-        assert_false(task_def.is_valid())
-
 
 class TestResultsList(object):
     """Unit tests to cover blaster results list class."""
