@@ -3,6 +3,8 @@
 This module is the worker which processes all the tasks/methods provided.
 """
 
+import signal
+
 from multiprocessing import Process, Queue
 from sys import exc_info
 from traceback import format_tb
@@ -65,6 +67,12 @@ class Engine(Process, LoggerMixin):
 
             task_cls = task.pop('task')
             methods = task.pop('methods')
+            timeout = task.pop('timeout', None)
+
+            def timeout_handler(signum, frame):
+                """Timeout handler."""
+                raise RuntimeError("Task: %s, method: %s, reached timeout!" %
+                                   (task['name'], method))
 
             try:
                 # initialize task object
@@ -72,6 +80,10 @@ class Engine(Process, LoggerMixin):
 
                 # run through task methods sequentially
                 for method in methods:
+                    signal.signal(signal.SIGALRM, timeout_handler)
+                    if timeout:
+                        signal.alarm(timeout)
+
                     # call method
                     value = getattr(task_obj, method)()
 
@@ -118,6 +130,8 @@ class Engine(Process, LoggerMixin):
                         _results.update(dict(status="n/a"))
                         self.output.put(_results)
             finally:
+                signal.alarm(0)
+
                 # update task definition into queue
                 results.update(task)
 
