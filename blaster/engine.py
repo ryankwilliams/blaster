@@ -3,8 +3,7 @@
 This module is the worker which processes all the tasks/methods provided.
 """
 
-from multiprocessing import Process
-from queue import Queue
+from multiprocessing import Process, Queue
 from sys import exc_info
 from traceback import format_tb
 from traceback import print_exc
