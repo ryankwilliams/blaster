@@ -1,6 +1,4 @@
-"""Blaster.
+"""Blaster package."""
 
-The blaster package.
-"""
 from .blast import Blaster
 from .core import BlasterError

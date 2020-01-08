@@ -4,9 +4,7 @@ The core module contains commonly used classes and functions by blaster.
 """
 from inspect import getmodule, stack
 from logging import Formatter, getLogger, StreamHandler
-from sys import exc_info
 from time import time
-from traceback import print_exc
 
 from .constants import LOG_FORMAT, LOG_LEVELS, REQ_TASK_KEYS
 
@@ -16,15 +14,18 @@ LOG = getLogger(__name__)
 class BlasterError(Exception):
     """Blaster's base error to raise."""
 
-    def __init__(self, message, results=list()):
+    def __init__(self, message, results=None):
         """Constructor.
 
-        :param message: Detailed error message.
-        :type message: str
-        :param results: Blaster results data.
-        :type results: list
+        :param str message: detailed error message
+        :param list results: blaster results data
         """
         super(BlasterError, self).__init__(message)
+
+        if results is None:
+            results = list()
+
+        self.message = message
         self.results = results
 
 
@@ -35,9 +36,8 @@ class LoggerMixin(object):
     def create_blaster_logger(log_level=None):
         """Blaster logger creation.
 
-        :param log_level: Logging level.
-        :type log_level: str
-        :return: Blaster logger.
+        :param str log_level: logging level
+        :return: blaster logger
         :rtype: object
         """
         blogger = getLogger('blaster')
@@ -72,7 +72,7 @@ class CalcTimeMixin(object):
     def delta(self):
         """Calculate time delta between start and end times.
 
-        :return: Hours, minutes, seconds
+        :return: hours, minutes, seconds
         :rtype: int
         """
         elapsed = self._end_time - self._start_time
@@ -89,17 +89,15 @@ class TaskDefinition(dict):
     def __init__(self, *args, **kwargs):
         """Constructor.
 
-        :param args: Variable number of arguments.
-        :type args: n/a
-        :param kwargs: Key word arguments.
-        :type kwargs: n/a
+        :param args: variable number of arguments
+        :param kwargs: key word arguments
         """
         super(TaskDefinition, self).__init__(*args, **kwargs)
 
     def is_valid(self):
         """Ensure the task definition is valid.
 
-        :return: Whether required keys are set.
+        :return: whether required keys are set.
         :rtype: bool
         """
         count = 0
@@ -120,7 +118,7 @@ class ResultsList(list):
     def analyze(self):
         """Analyze the list of results based on overall task status.
 
-        :return: Whether task run was pass or fail.
+        :return: whether task run was pass or fail.
         :rtype: int
         """
         for item in self:
@@ -131,9 +129,8 @@ class ResultsList(list):
     def coordinate(self, task):
         """Update results with their corresponding task definitions.
 
-        :param task: Task definition to compare too.
-        :type task: dict
-        :return: Matching result task to the task given.
+        :param dict task: task definition to compare too
+        :return: matching result task to the task given
         :rtype: dict
         """
         for item in self:
@@ -142,22 +139,3 @@ class ResultsList(list):
                     return item
             except KeyError as ex:
                 raise KeyError(ex)
-
-
-class EngineMixin(object):
-    """The standard blaster engine mixin class.
-
-    The primary purpose of this mixin class is to provide blaster engine
-    classes with commonly used methods. It removes the need to duplicate
-    code between engine modules.
-    """
-
-    @staticmethod
-    def get_traceback():
-        """Get traceback when exception is raised. Will log traceback as well.
-
-        :return: Exception information.
-        :rtype: tuple
-        """
-        print_exc()
-        return exc_info()

@@ -1,14 +1,15 @@
-"""Blaster blast.
+"""Blast module.
 
-The blast module contains the main blaster class to run.
+Main entry point to blaster.
 """
+
 from multiprocessing import Queue
 from time import sleep
 from uuid import uuid4
 
 from .core import BlasterError
 from .core import CalcTimeMixin, LoggerMixin, ResultsList, TaskDefinition
-from .engine import BlasterParallel, BlasterSerial
+from .engine import Engine
 from .metadata import __version__
 
 
@@ -19,19 +20,17 @@ class Blaster(CalcTimeMixin, LoggerMixin):
     input and run its defined methods.
     """
 
-    def __init__(self, tasks, log_level='info'):
+    def __init__(self, tasks, log_level="info"):
         """Constructor.
 
-        :param tasks: Tasks to be blasted off.
-        :type tasks: list
-        :param log_level: Logging level to handle logging messages.
-        :type log_level: str
+        :param list tasks: tasks to be processed
+        :param str log_level: log level tailoring messages logged
         """
         self.tasks = tasks
 
         # set queue attributes (not initialized)
-        self.task_queue = None
-        self.done_queue = None
+        self.task_queue = Queue()
+        self.done_queue = Queue()
 
         # set list attributes
         self.updated_tasks = list()
@@ -54,27 +53,100 @@ class Blaster(CalcTimeMixin, LoggerMixin):
                 if key in task:
                     task[key] = value
 
-    def blastoff(self, serial=False, raise_on_failure=False):
+    def blastoff(self, serial=False, raise_on_failure=False, delay=5):
         """Blast off tasks concurrently or sequentially calling their defined
         methods.
 
-        :param serial: Whether to run tasks sequentially. (default = parallel)
-        :type serial: bool
-        :param raise_on_failure: Whether to raise exception on failure.
-        :type raise_on_failure: bool
-        :return: Content from task method calls.
+        :param bool serial: whether to run tasks sequentially
+        :param bool raise_on_failure: whether to raise exception on failure
+        :param int delay: duration to delay between starting processes
+        :return: content from task method calls
         :rtype: list
         """
         self.logger.info("--> Blaster v{} <--".format(__version__))
         self.logger.info("Task Execution: {}".format(
             "Sequential" if serial else "Concurrent"))
 
+        # perform initialization
+        self.initialize()
+
+        self.logger.info("Tasks:")
+
+        # submit tasks to queue
+        for index, task in enumerate(self.updated_tasks, start=1):
+            self.logger.info("""{}. Task     : {}
+                                    Class    : {}
+                                    Methods  : {}""".format(
+                index, task['name'], task['task'], task['methods']))
+            self.task_queue.put(task)
+
+        self.logger.info("3..2..1.. BLAST OFF!")
+
         if serial:
-            # serial task runs
-            return self.serial(raise_on_failure)
+            # run tasks sequentially, using only 1 process
+            process_count = 1
         else:
-            # parallel task runs
-            return self.parallel(raise_on_failure)
+            # determine number of processes to start based on total tasks
+            if len(self.updated_tasks) >= 10:
+                process_count = 10
+            else:
+                process_count = len(self.updated_tasks)
+
+        self.logger.debug("Total processes to run tasks: %s." % process_count)
+
+        # create worker processes
+        for i in range(process_count):
+            self.processes.append(
+                Engine(self.task_queue, self.done_queue, serial)
+            )
+
+        # start worker processes
+        for p in self.processes:
+            p.start()
+            sleep(delay)
+
+        try:
+            # get status/results
+            self.get_results()
+
+            # stop worker processes
+            for i in range(process_count):
+                self.task_queue.put("STOP")
+
+            # correlate the results with initial tasks
+            self.correlate_data()
+        except KeyboardInterrupt:
+            # get status/results
+            self.get_results()
+
+            # correlate the results with initial tasks
+            self.correlate_data()
+
+            # terminate processes
+            for p in self.processes:
+                p.terminate()
+                p.join()
+
+            self.logger.info("Blast off was unable to run all tasks given "
+                             "due to CRTL+C interrupt.")
+        finally:
+            # save end time
+            self.end()
+
+            # calculate time delta
+            hour, minutes, seconds = self.delta()
+            self.logger.info(
+                "BLAST OFF COMPLETE! TOTAL DURATION: %dh:%dm:%ds" %
+                (hour, minutes, seconds))
+
+            # handle the return
+            if raise_on_failure and self.results.analyze():
+                raise BlasterError(
+                    "One or more tasks got a status of non zero.",
+                    results=self.results
+                )
+            else:
+                return self.results
 
     def initialize(self):
         """Perform initial tasks before processing tasks by blaster."""
@@ -103,145 +175,3 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             # add updated task to list
             self.updated_tasks.append(task)
         self.logger.debug("Blaster initialization complete!")
-
-    def finalize(self, raise_on_failure):
-        """Perform final tasks before ending blaster.
-
-        :param raise_on_failure: Whether to raise exception on failure.
-        :type raise_on_failure: bool
-        :return: blaster's result task list
-        :rtype: list
-        """
-        # save end time
-        self.end()
-
-        # calculate time delta
-        hour, minutes, seconds = self.delta()
-        self.logger.info("BLAST OFF COMPLETE! TOTAL DURATION: %dh:%dm:%ds" %
-                         (hour, minutes, seconds))
-
-        # handle the return
-        if raise_on_failure and self.results.analyze():
-            raise BlasterError(
-                "One or more tasks got a status of non zero.",
-                results=self.results
-            )
-        else:
-            return self.results
-
-    def parallel(self, raise_on_failure, delay=5):
-        """Blast off tasks concurrently call their defined methods.
-
-        Each task has a list of methods to execute. This method will create
-        x amount of processes (start them) and then begin to add the tasks to
-        a queue. It will begin to process the tasks and run their methods they
-        have defined. Once all tasks are finsihed in the queue, it will handle
-        the results and return them back to the user.
-
-        :param raise_on_failure: Whether to raise exception on failure.
-        :type raise_on_failure: bool
-        :param delay: Duration to delay between starting processes.
-        :type delay: int
-        :return: Content from task method calls.
-        :rtype: list
-        """
-        # create queues
-        self.task_queue = Queue()
-        self.done_queue = Queue()
-
-        # perform initialization
-        self.initialize()
-
-        self.logger.info("Tasks:")
-
-        # submit tasks to queue
-        for index, task in enumerate(self.updated_tasks, start=1):
-            self.logger.info("""{}. Task     : {}
-                                Class    : {}
-                                Methods  : {}""".format(
-                index, task['name'], task['task'], task['methods']))
-            self.task_queue.put(task)
-
-        self.logger.info("3..2..1.. BLAST OFF!")
-
-        # determine number of processes to start based on total tasks
-        if len(self.updated_tasks) >= 10:
-            process_count = 10
-        else:
-            process_count = len(self.updated_tasks)
-
-        self.logger.debug("Total processes to run tasks: %s." % process_count)
-
-        # create worker processes
-        for i in range(process_count):
-            self.processes.append(
-                BlasterParallel(self.task_queue, self.done_queue)
-            )
-
-        # start worker processes
-        for p in self.processes:
-            p.start()
-            sleep(delay)
-
-        try:
-            # get status/results
-            self.get_results()
-
-            # stop worker processes
-            for i in range(process_count):
-                self.task_queue.put('STOP')
-
-            # correlate the results with initial tasks
-            self.correlate_data()
-        except KeyboardInterrupt:
-            # get status/results
-            self.get_results()
-
-            # correlate the results with initial tasks
-            self.correlate_data()
-
-            # terminate processes
-            for p in self.processes:
-                p.terminate()
-                p.join()
-
-            self.logger.info("Blast off was unable to run all tasks given "
-                             "due to CRTL+C interrupt.")
-        finally:
-            return self.finalize(raise_on_failure)
-
-    def serial(self, raise_on_failure):
-        """Blast off tasks sequentially calling their defined methods.
-
-        :param raise_on_failure: Whether to raise exception on failure.
-        :type raise_on_failure: bool
-        :return: Content from task method calls.
-        :rtype: list
-        """
-        # perform initialization
-        self.initialize()
-
-        self.logger.info("Tasks:")
-
-        for index, task in enumerate(self.updated_tasks, start=1):
-            self.logger.info("""{}. Task     : {}
-                                Class    : {}
-                                Methods  : {}""".format(
-                index, task['name'], task['task'], task['methods']))
-            bserial = BlasterSerial(task, self.results)
-            bserial.run()
-
-            # Stop processing tasks if the task failed. The only time tasks
-            # would continue to run is if you are running in parallel. That is
-            # because tasks would not have any correlation between each other.
-            if self.results[index-1]['status'] != 0:
-                # before exiting we need to add all tasks that were not
-                # executed and set status of say n/a
-                for item in self.updated_tasks:
-                    if item['bid'] == task['bid']:
-                        continue
-                    item['status'] = "n/a"
-                    self.results.append(dict(item))
-                break
-
-        return self.finalize(raise_on_failure)
