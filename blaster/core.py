@@ -5,6 +5,7 @@ The core module contains commonly used classes and functions by blaster.
 from inspect import getmodule, stack
 from logging import Formatter, getLogger, StreamHandler
 from time import time
+from uuid import uuid4
 
 from blaster.constants import *
 
@@ -69,15 +70,15 @@ class CalcTimeMixin(object):
     _start_time = None
     _end_time = None
 
-    def start(self):
+    def start_time(self):
         """Save the start time."""
         self._start_time = time()
 
-    def end(self):
+    def end_time(self):
         """Save the end time."""
         self._end_time = time()
 
-    def delta(self):
+    def time_delta(self):
         """Calculate time delta between start and end times.
 
         :return: hours, minutes, seconds
@@ -101,19 +102,16 @@ class TaskDefinition(dict):
         :param kwargs: key word arguments
         """
         super(TaskDefinition, self).__init__(*args, **kwargs)
+        self.setdefault("bid", str(uuid4()))
+        self.validate()
 
-    def is_valid(self):
-        """Ensure the task definition is valid.
-
-        :return: whether required keys are set.
-        :rtype: bool
-        """
-        count = 0
+    def validate(self):
+        """Validate task definition to ensure required keys set."""
         for key in REQ_TASK_KEYS:
             if key not in self:
-                LOG.error('Req. key %s missing from task definition!' % key)
-                count += 1
-        return True if count == 0 else False
+                raise BlasterError(
+                    "Required key: '%s' missing from task: %s" %
+                    (key, self.get('name')))
 
 
 class ResultsList(list):

@@ -5,7 +5,6 @@ Main entry point to blaster.
 
 from multiprocessing import Queue
 from time import sleep
-from uuid import uuid4
 
 from blaster.core import *
 from blaster.engine import Engine
@@ -26,12 +25,8 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         :param str log_level: log level tailoring messages logged
         """
         self.tasks = tasks
-
-        # set queue attributes (not initialized)
         self.task_queue = Queue()
         self.done_queue = Queue()
-
-        # set list attributes
         self.updated_tasks = list()
         self.processes = list()
         self.results = ResultsList()
@@ -52,6 +47,16 @@ class Blaster(CalcTimeMixin, LoggerMixin):
                 if key in task:
                     task[key] = value
 
+    def _total_workers(self, serial):
+        """Return the total number of worker processes to use."""
+        count = 10
+        if serial:
+            count = 1
+        else:
+            if len(self.updated_tasks) < 10:
+                count = len(self.updated_tasks)
+        return count
+
     def blastoff(self, serial=False, raise_on_failure=False, delay=5):
         """Blast off tasks concurrently or sequentially calling their defined
         methods.
@@ -66,40 +71,28 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         self.logger.info("Task Execution: {}".format(
             "Sequential" if serial else "Concurrent"))
 
-        # perform initialization
-        self.initialize()
-
         self.logger.info("Tasks:")
-
-        # submit tasks to queue
-        for index, task in enumerate(self.updated_tasks, start=1):
-            self.logger.info("""{}. Task     : {}
+        for index, task in enumerate(self.tasks, start=1):
+            task = TaskDefinition(task)
+            self.logger.info("""{}.     Task     : {}
                                     Class    : {}
                                     Methods  : {}""".format(
                 index, task['name'], task['task'], task['methods']))
+            self.updated_tasks.append(task)
             self.task_queue.put(task)
 
-        self.logger.info("3..2..1.. BLAST OFF!")
-
-        if serial:
-            # run tasks sequentially, using only 1 process
-            process_count = 1
-        else:
-            # determine number of processes to start based on total tasks
-            if len(self.updated_tasks) >= 10:
-                process_count = 10
-            else:
-                process_count = len(self.updated_tasks)
-
-        self.logger.debug("Total processes to run tasks: %s." % process_count)
+        # get total worker processes to use
+        worker_count = self._total_workers(serial)
 
         # create worker processes
-        for i in range(process_count):
+        for i in range(worker_count):
             self.processes.append(
                 Engine(self.task_queue, self.done_queue, serial)
             )
 
         # start worker processes
+        self.start_time()
+        self.logger.info("3..2..1.. BLAST OFF!")
         for p in self.processes:
             p.start()
             sleep(delay)
@@ -109,7 +102,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             self.get_results()
 
             # stop worker processes
-            for i in range(process_count):
+            for i in range(worker_count):
                 self.task_queue.put("STOP")
 
             # correlate the results with initial tasks
@@ -129,11 +122,10 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             self.logger.info("Blast off was unable to run all tasks given "
                              "due to CRTL+C interrupt.")
         finally:
-            # save end time
-            self.end()
+            self.end_time()
 
             # calculate time delta
-            hour, minutes, seconds = self.delta()
+            hour, minutes, seconds = self.time_delta()
             self.logger.info(
                 "BLAST OFF COMPLETE! TOTAL DURATION: %dh:%dm:%ds" %
                 (hour, minutes, seconds))
@@ -146,31 +138,3 @@ class Blaster(CalcTimeMixin, LoggerMixin):
                 )
             else:
                 return self.results
-
-    def initialize(self):
-        """Perform initial tasks before processing tasks by blaster."""
-        self.logger.debug("Blaster initializing..")
-
-        # save start time
-        self.start()
-
-        # build updated task list
-        self.logger.debug("Verifying required keys are set.")
-
-        for index, task in enumerate(self.tasks, start=1):
-            # create task definition
-            task = TaskDefinition(task)
-
-            # task definition valid?
-            if not task.is_valid():
-                raise BlasterError("Req. keys missing for task definition.")
-
-            # generate random unique id
-            task['bid'] = str(uuid4())
-
-            self.logger.debug("%s. task: %s, methods: %s" % (
-                index, task['task'].__name__, task['methods']))
-
-            # add updated task to list
-            self.updated_tasks.append(task)
-        self.logger.debug("Blaster initialization complete!")

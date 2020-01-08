@@ -76,7 +76,7 @@ class TestCalcTimeMixin(object):
         saved is not none.
         """
         calc = CalcTimeMixin()
-        calc.start()
+        calc.start_time()
         assert_is_not_none(calc._start_time)
 
     @staticmethod
@@ -87,7 +87,7 @@ class TestCalcTimeMixin(object):
         saved is not none.
         """
         calc = CalcTimeMixin()
-        calc.end()
+        calc.end_time()
         assert_is_not_none(calc._end_time)
 
     @staticmethod
@@ -99,10 +99,10 @@ class TestCalcTimeMixin(object):
         data type.
         """
         calc = CalcTimeMixin()
-        calc.start()
+        calc.start_time()
         sleep(1)
-        calc.end()
-        hour, minute, second = calc.delta()
+        calc.end_time()
+        hour, minute, second = calc.time_delta()
         assert_true(isinstance(hour, (float, int)))
         assert_true(isinstance(minute, (float, int)))
         assert_true(isinstance(second, (float, int)))
