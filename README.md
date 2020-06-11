@@ -76,6 +76,27 @@ case **style**) and then call the methods defined.
 ]
 ```
 
+You also have the ability to set a timeout for each task. If the timeout is
+reached, the task will be exited.
+
+```python
+[
+    {
+        'name': 'House #1',
+        'task': House,
+        'methods': [
+            'foundation',
+            'frame',
+            'roof',
+            'furnish',
+            'enjoy'
+        ],
+        'style': 'contemporary',
+        'timeout': 10
+    }
+]
+```
+
 The nice feature with blaster is you can have multiple tasks but each one
 can call various methods within that task class. They do not all need to call
 the same methods! See the example below:
