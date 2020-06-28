@@ -1,140 +1,274 @@
-"""Blast module.
+"""Blaster, a simple package to easily run a set of tasks either concurrently
+or sequentially. Only using Python's built-in libraries.
 
-Main entry point to blaster.
+Blaster is here to help other Python applications run tasks. Removing the
+need for each application to write their own code to run tasks. Leave all of
+this work up to blaster and just provide the classes and methods you would
+like to run.
 """
 
-from multiprocessing import Queue
-from time import sleep
+import multiprocessing
+import signal
+import sys
+import time
+import traceback
 
+from blaster.compat import queue
 from blaster.core import *
-from blaster.engine import Engine
 from blaster.metadata import __version__
 
 
-class Blaster(CalcTimeMixin, LoggerMixin):
-    """Blast a list of tasks concurrently or sequentially..
+class Worker(LoggerMixin):
+    """Worker class."""
 
-    The primary focus of this class is to processes a list of tasks given as
-    input and run its defined methods.
-    """
+    def __init__(self):
+        """Constructor."""
+        pass
+
+    @staticmethod
+    def get_traceback():
+        """Return stack trace from the exception raised."""
+        traceback.print_exc()
+        return sys.exc_info()
+
+    def run(self, task_queue, task_complete_queue, serial):
+        """Process the tasks methods from the given queues.
+
+        :param multiprocessing.Queue task_queue: the queue containing the
+            tasks to process.
+        :param multiprocessing.Queue task_complete_queue: the queue containing
+            updated tasks that have been or failed to fully process
+        :param bool serial: whether this method is being run concurrently or
+            sequentially
+        """
+        # Controls if remaining tasks in the queue should be flushed out
+        flush_queue = False
+
+        # Loop through all tasks in the queue
+        # while True:
+        #     task = task_queue.get()
+        #     if task == "STOP":
+        #         break
+        for task in iter(task_queue.get, "STOP"):
+            self.logger.debug("Processing task: %s" % task['name'])
+
+            # Instantiate task class
+            task_obj = task['task'](**task)
+
+            # Get the task timeout
+            timeout = task.pop('timeout', None)
+
+            # A list holding all methods processed with their results
+            methods = []
+
+            def timeout_handler(signum, frame):
+                """Timeout handler."""
+                raise RuntimeError("Task: %s, method: %s, reached timeout!" %
+                                   (task['name'], method))
+
+            # Loop through and run all task methods
+            for index, method in enumerate(task['methods']):
+                self.logger.debug("Running method %s" % method)
+
+                try:
+                    # Set task alarm timeout if supplied
+                    if timeout:
+                        signal.signal(signal.SIGALRM, timeout_handler)
+                        signal.alarm(timeout)
+
+                    # Run the task method
+                    value = getattr(task_obj, method)()
+
+                    # Set the tasks method results
+                    methods.append({"name": method, "status": 0,
+                                    "rvalue": value})
+                    task['status'] = 0
+                except (Exception, KeyboardInterrupt):
+                    self.logger.error(
+                        "A exception was raised while processing task: %s "
+                        "method: %s" % (task['name'], method))
+                    task['status'] = 1
+
+                    # Get stack trace
+                    stack_trace = self.get_traceback()
+
+                    # Set the tasks method results
+                    methods.append({
+                        "name": method,
+                        "status": 1,
+                        "rvalue": None,
+                        "traceback": traceback.format_tb(stack_trace[2])
+                    })
+
+                    # Set the remaining method results since they were not
+                    # able to run
+                    for item in task['methods'][index+1:]:
+                        methods.append({
+                            "name": item,
+                            "status": "n/a",
+                            "rvalue": None
+                        })
+
+                    # Since a failure happened, we need to flush out the queue
+                    flush_queue = True
+                    break
+                finally:
+                    # Reset the alarm if timeout was supplied
+                    if timeout:
+                        signal.alarm(0)
+
+            task['methods'] = methods
+            task_complete_queue.put(task)
+
+            # Break out of the loop and flush out the remaining tasks in the
+            # queue when serial is true
+            if flush_queue and serial:
+                time.sleep(1)
+                # Flush out remaining tasks in the queue
+                while not task_queue.empty():
+                    task = task_queue.get()
+                    methods = task.pop('methods')
+                    _methods = []
+                    for method in methods:
+                        _methods.append({
+                            "name": method,
+                            "status": "n/a",
+                            "rvalue": None
+                        })
+                    task['status'] = "n/a"
+                    task['methods'] = _methods
+                    task_complete_queue.put(task)
+                break
+
+            if serial and task_queue.qsize() == 0:
+                break
+
+
+class Blaster(CalcTimeMixin, LoggerMixin):
+    """Blaster class."""
 
     def __init__(self, tasks, log_level="info"):
         """Constructor.
 
-        :param list tasks: tasks to be processed
-        :param str log_level: log level tailoring messages logged
+        Responsible for initializing attributes and performing any base
+        configuration required.
+
+        :param list tasks: the list of tasks to be processed
+        :param str log_level: the logging level to be used when logging
+            messages
         """
         self.tasks = tasks
-        self.task_queue = Queue()
-        self.done_queue = Queue()
-        self.updated_tasks = list()
-        self.processes = list()
+
+        # Set place holder attributes for queues
+        self.task_queue = None
+        self.task_complete_queue = None
+
         self.results = ResultsList()
 
-        # create blaster logger
+        # Configure blasters logger
         self.create_blaster_logger(log_level.lower())
 
-    def get_results(self):
-        """Get results for tasks in the queue."""
-        for i in range(len(self.updated_tasks)):
-            self.results.append(self.done_queue.get())
-
-    def correlate_data(self):
-        """Correlate the task definition to its results data."""
-        for task in self.updated_tasks:
-            data = self.results.coordinate(task)
-            for key, value in data.items():
-                if key in task:
-                    task[key] = value
-
-    def _total_workers(self, serial):
+    def total_processes(self):
         """Return the total number of worker processes to use."""
         count = 10
-        if serial:
-            count = 1
-        else:
-            if len(self.updated_tasks) < 10:
-                count = len(self.updated_tasks)
+        total_tasks = len(self.tasks)
+        if total_tasks < 10:
+            count = total_tasks
+        self.logger.debug("Processor count: {}".format(count))
         return count
 
-    def blastoff(self, serial=False, raise_on_failure=False, delay=5):
+    def blastoff(self, serial=False, raise_on_failure=False):
         """Blast off tasks concurrently or sequentially calling their defined
-        methods.
+                methods.
 
         :param bool serial: whether to run tasks sequentially
         :param bool raise_on_failure: whether to raise exception on failure
-        :param int delay: duration to delay between starting processes
         :return: content from task method calls
         :rtype: list
         """
-        self.logger.info("--> Blaster v{} <--".format(__version__))
-        self.logger.info("Task Execution: {}".format(
-            "Sequential" if serial else "Concurrent"))
+        self.logger.info("--> Blaster v%s <--" % __version__)
+        self.logger.info("Task Execution: %s" %
+                         ("Sequential" if serial else "Concurrent"))
+
+        # Initialize queues based on execution type
+        if serial:
+            self.task_queue = queue.Queue()
+            self.task_complete_queue = queue.Queue()
+        else:
+            self.task_queue = multiprocessing.Queue()
+            self.task_complete_queue = multiprocessing.Queue()
 
         self.logger.info("Tasks:")
         for index, task in enumerate(self.tasks, start=1):
             task = TaskDefinition(task)
-            self.logger.info("""{}.     Task     : {}
-                                    Class    : {}
-                                    Methods  : {}""".format(
+            self.logger.info("""%s. Task     : %s
+                                Class    : %s
+                                Methods  : %s""" % (
                 index, task['name'], task['task'], task['methods']))
-            self.updated_tasks.append(task)
             self.task_queue.put(task)
 
-        # get total worker processes to use
-        worker_count = self._total_workers(serial)
-
-        # create worker processes
-        for i in range(worker_count):
-            self.processes.append(
-                Engine(self.task_queue, self.done_queue, serial)
-            )
-
-        # start worker processes
+        # Save start time
         self.start_time()
-        self.logger.info("3..2..1.. BLAST OFF!")
-        for p in self.processes:
-            p.start()
-            sleep(delay)
 
-        try:
-            # get status/results
-            self.get_results()
+        self.logger.info("** BLASTER BEGIN **")
 
-            # stop worker processes
-            for i in range(worker_count):
-                self.task_queue.put("STOP")
+        worker = Worker()
+        if serial:
+            worker.run(self.task_queue, self.task_complete_queue, serial)
+        else:
+            # Determine the number of processes to use
+            processes_count = self.total_processes()
 
-            # correlate the results with initial tasks
-            self.correlate_data()
-        except KeyboardInterrupt:
-            # get status/results
-            self.get_results()
-
-            # correlate the results with initial tasks
-            self.correlate_data()
-
-            # terminate processes
-            for p in self.processes:
-                p.terminate()
-                p.join()
-
-            self.logger.info("Blast off was unable to run all tasks given "
-                             "due to CRTL+C interrupt.")
-        finally:
-            self.end_time()
-
-            # calculate time delta
-            hour, minutes, seconds = self.time_delta()
-            self.logger.info(
-                "BLAST OFF COMPLETE! TOTAL DURATION: %dh:%dm:%ds" %
-                (hour, minutes, seconds))
-
-            # handle the return
-            if raise_on_failure and self.results.analyze():
-                raise BlasterError(
-                    "One or more tasks got a status of non zero.",
-                    results=self.results
+            # Build processes
+            processes = []
+            for i in range(processes_count):
+                processes.append(
+                    multiprocessing.Process(target=worker.run, args=(
+                        self.task_queue, self.task_complete_queue, serial))
                 )
-            else:
-                return self.results
+
+            # Start processes
+            for p in processes:
+                p.start()
+
+            try:
+                for i in range(len(self.tasks)):
+                    self.results.append(self.task_complete_queue.get())
+                for i in range(processes_count):
+                    self.task_queue.put("STOP")
+            except KeyboardInterrupt:
+                self.logger.warning(
+                    "Delaying 15 seconds to allow worker processes to flush "
+                    "out any remaining items in the queue.")
+                time.sleep(15)
+
+                while not self.task_complete_queue.empty():
+                    self.results.append(self.task_complete_queue.get())
+
+                for p in processes:
+                    self.logger.error("Terminating child process: %s" % p.name)
+                    p.terminate()
+                    p.join(2)
+                self.logger.error("All child processes were terminated.")
+
+        # Save end time
+        self.end_time()
+
+        # Get tasks and their results
+        while not self.task_complete_queue.empty():
+            self.results.append(self.task_complete_queue.get())
+
+        # Calculate time delta
+        hour, minutes, seconds = self.time_delta()
+        self.logger.info("** BLASTER COMPLETE **")
+        self.logger.info("    -> TOTAL DURATION: %dh:%dm:%ds" %
+                         (hour, minutes, seconds))
+
+        # Determine how to return results based on users input
+        if raise_on_failure and self.results.analyze():
+            raise BlasterError(
+                "One or more tasks got a status of non zero.",
+                results=self.results
+            )
+        else:
+            return self.results

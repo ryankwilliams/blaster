@@ -131,17 +131,3 @@ class ResultsList(list):
             if item['status'] != 0:
                 return 1
         return 0
-
-    def coordinate(self, task):
-        """Update results with their corresponding task definitions.
-
-        :param dict task: task definition to compare too
-        :return: matching result task to the task given
-        :rtype: dict
-        """
-        for item in self:
-            try:
-                if item['bid'] == task['bid']:
-                    return item
-            except KeyError as ex:
-                raise KeyError(ex)

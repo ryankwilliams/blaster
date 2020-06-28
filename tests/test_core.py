@@ -162,28 +162,3 @@ class TestResultsList(object):
         res = ResultsList()
         res.append(dict(name='item1', status=1))
         assert_equal(res.analyze(), 1)
-
-    @staticmethod
-    def test_coordinate_valid_results():
-        """Coordinate passed blaster results.
-
-        This method tests coordinating task data to the results data.
-        (positive test)
-        """
-        res = ResultsList()
-        res.append(dict(name='item1', bid='1234', status=1))
-        task = dict(name='item1', bid='1234')
-        assert_is_instance(res.coordinate(task), dict)
-
-    @staticmethod
-    @raises(KeyError)
-    def test_coordinate_invalid_results():
-        """Coordinate failed blaster results.
-
-        This method tests coordinating task data to the results data.
-        (negative test)
-        """
-        res = ResultsList()
-        res.append(dict(name='item1', bid='1234', status=1))
-        task = dict(name='item1')
-        assert_is_instance(res.coordinate(task), dict)
