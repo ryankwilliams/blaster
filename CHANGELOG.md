@@ -5,12 +5,14 @@ All changes made to this project will be documented here.
 When adding changes, please follow the standards at the link below:
 https://keepachangelog.com/en/1.0.0/
 
-## [0.3.0] - 2020-07-01
+## [0.4.0] - 2020-07-01
+
+### Changed
+- Improved the worker class for handling both run types
+
+## [0.3.0] - 2020-06-11
 ### Added
 - Ability to set a timeout per task to exit when timeout is reached
-
-## Changed
-- Improved the worker class for handling both run types
 
 ## [0.2.0] - 2019-12-23
 ### Added
