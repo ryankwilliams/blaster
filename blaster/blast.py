@@ -34,15 +34,18 @@ class Worker(LoggerMixin):
     def run(self, task_queue, task_complete_queue, serial):
         """Process the tasks methods from the given queues.
 
-        :param multiprocessing.Queue task_queue: the queue containing the
+        :param queue.Queue task_queue: the queue containing the
             tasks to process.
-        :param multiprocessing.Queue task_complete_queue: the queue containing
+        :param queue.Queue task_complete_queue: the queue containing
             updated tasks that have been or failed to fully process
         :param bool serial: whether this method is being run concurrently or
             sequentially
         """
         # Controls if remaining tasks in the queue should be flushed out
         flush_queue = False
+
+        # Holds the type of exception thrown
+        exeception_type = ""
 
         # Loop through all tasks in the queue
         # while True:
@@ -83,7 +86,7 @@ class Worker(LoggerMixin):
                     methods.append({"name": method, "status": 0,
                                     "rvalue": value})
                     task['status'] = 0
-                except (Exception, KeyboardInterrupt):
+                except (Exception, KeyboardInterrupt) as e:
                     self.logger.error(
                         "A exception was raised while processing task: %s "
                         "method: %s" % (task['name'], method))
@@ -111,6 +114,9 @@ class Worker(LoggerMixin):
 
                     # Since a failure happened, we need to flush out the queue
                     flush_queue = True
+
+                    # Save the name of the exception thrown
+                    exception_type = str(type(e).__name__).lower()
                     break
                 finally:
                     # Reset the alarm if timeout was supplied
@@ -120,13 +126,19 @@ class Worker(LoggerMixin):
             task['methods'] = methods
             task_complete_queue.put(task)
 
-            # Break out of the loop and flush out the remaining tasks in the
-            # queue when serial is true
-            if flush_queue and serial:
+            # Break out of the loop and flush out remaining tasks in the queue
+            #  - expr_1 = parallel mode
+            #  - expr_2 = sequential mode
+            expr_1 = (flush_queue and exeception_type == "keyboardinterrupt"
+                      and not serial)
+            expr_2 = (flush_queue and serial)
+            if expr_1 or expr_2:
                 time.sleep(1)
                 # Flush out remaining tasks in the queue
                 while not task_queue.empty():
                     task = task_queue.get()
+                    if task == "STOP":
+                        break
                     methods = task.pop('methods')
                     _methods = []
                     for method in methods:
@@ -140,7 +152,7 @@ class Worker(LoggerMixin):
                     task_complete_queue.put(task)
                 break
 
-            if serial and task_queue.qsize() == 0:
+            if (serial and task_queue.qsize() == 0) or expr_1:
                 break
 
 
@@ -244,6 +256,9 @@ class Blaster(CalcTimeMixin, LoggerMixin):
 
                 while not self.task_complete_queue.empty():
                     self.results.append(self.task_complete_queue.get())
+
+                for i in range(processes_count):
+                    self.task_queue.put("STOP")
 
                 for p in processes:
                     self.logger.error("Terminating child process: %s" % p.name)
