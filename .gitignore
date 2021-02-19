@@ -10,4 +10,6 @@ build
 
 # Tests
 .coverage
-tests/coverage
+
+# Virtualenvs
+venv

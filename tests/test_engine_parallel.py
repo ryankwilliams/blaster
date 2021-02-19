@@ -4,8 +4,6 @@ Test cases to test the blaster engine parallel module.
 """
 from multiprocessing import Queue
 
-from nose.tools import assert_is_instance
-
 from blaster.blast import Worker
 from tests.examples.invalid import InvalidCar
 from tests.examples.valid import ValidCar
@@ -26,7 +24,7 @@ class TestEngineParallel(object):
         the Parallel class.
         """
         processor = Worker()
-        assert_is_instance(processor, Worker)
+        assert isinstance(processor, Worker)
 
     def test_get_traceback(self):
         """Get traceback information.
@@ -35,7 +33,7 @@ class TestEngineParallel(object):
         information. It will verify the data type returned is a tuple.
         """
         parallel = Worker()
-        assert_is_instance(parallel.get_traceback(), tuple)
+        assert isinstance(parallel.get_traceback(), tuple)
 
     def test_valid_run(self):
         """Call the parallel class run method.

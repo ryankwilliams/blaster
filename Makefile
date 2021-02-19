@@ -1,13 +1,8 @@
 .PHONY: all
-all: clean tests
+all: clean test
 
 .PHONY: clean
-clean: clean-pyc clean-code-coverage
-
-.PHONY: clean-code-coverage
-clean-code-coverage:
-	rm -rf .coverage
-	rm -rf tests/coverage
+clean: clean-pyc
 
 .PHONY: clean-packaging
 clean-packaging:
@@ -30,5 +25,5 @@ bump-minor:
 bump-patch:
 	bumpversion patch --commit
 
-tests: clean-code-coverage
-	nosetests -v --with-ignore-docstrings --with-coverage --cover-package blaster --cover-html --cover-html-dir tests/coverage
+test:
+	pytest -v --cov=blaster tests

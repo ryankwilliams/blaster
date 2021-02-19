@@ -5,8 +5,6 @@ Test cases to test the blaster engine serial module.
 
 import queue
 
-from nose.tools import assert_is_instance
-
 from blaster.blast import Worker
 from tests.examples.invalid import InvalidCar
 from tests.examples.valid import ValidCar
@@ -27,7 +25,7 @@ class TestEngineSerial(object):
         the Serial class.
         """
         processor = Worker()
-        assert_is_instance(processor, Worker)
+        assert isinstance(processor, Worker)
 
     def test_get_traceback(self):
         """Get traceback information.
@@ -36,7 +34,7 @@ class TestEngineSerial(object):
         information. It will verify the data type returned is a tuple.
         """
         serial = Worker()
-        assert_is_instance(serial.get_traceback(), tuple)
+        assert isinstance(serial.get_traceback(), tuple)
 
     def test_valid_run(self):
         """Call the serial class run method.

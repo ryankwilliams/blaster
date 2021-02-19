@@ -4,8 +4,7 @@ Test cases to test the blaster core module.
 """
 from time import sleep
 
-from nose.tools import assert_equal, assert_is_instance, assert_is_not_none, \
-    assert_true, assert_false, raises
+import pytest
 
 from blaster.core import BlasterError, CalcTimeMixin, LoggerMixin, \
     ResultsList, TaskDefinition
@@ -27,8 +26,8 @@ class TestBlasterError(object):
         try:
             raise BlasterError('Blaster error!')
         except BlasterError as ex:
-            assert_equal('Blaster error!', ex.message)
-            assert_equal(list(), ex.results)
+            assert 'Blaster error!' == ex.message
+            assert list() == ex.results
 
 
 class TestLoggerMixin(object):
@@ -48,7 +47,7 @@ class TestLoggerMixin(object):
         """
         logger = LoggerMixin()
         logger.create_blaster_logger('info')
-        assert_is_instance(logger, LoggerMixin)
+        assert isinstance(logger, LoggerMixin)
 
     @staticmethod
     def test_logger_object():
@@ -77,7 +76,7 @@ class TestCalcTimeMixin(object):
         """
         calc = CalcTimeMixin()
         calc.start_time()
-        assert_is_not_none(calc._start_time)
+        assert calc.start_time is not None
 
     @staticmethod
     def test_save_end_time():
@@ -88,7 +87,7 @@ class TestCalcTimeMixin(object):
         """
         calc = CalcTimeMixin()
         calc.end_time()
-        assert_is_not_none(calc._end_time)
+        assert calc.end_time is not None
 
     @staticmethod
     def test_time_delta():
@@ -103,9 +102,9 @@ class TestCalcTimeMixin(object):
         sleep(1)
         calc.end_time()
         hour, minute, second = calc.time_delta()
-        assert_true(isinstance(hour, (float, int)))
-        assert_true(isinstance(minute, (float, int)))
-        assert_true(isinstance(second, (float, int)))
+        assert isinstance(hour, (float, int))
+        assert isinstance(minute, (float, int))
+        assert isinstance(second, (float, int))
 
 
 class TestTaskDefinition(object):
@@ -124,8 +123,8 @@ class TestTaskDefinition(object):
         name attribute.
         """
         task_def = TaskDefinition(name='blaster')
-        assert_is_instance(task_def, TaskDefinition)
-        assert_true(hasattr(task_def, 'name'))
+        assert isinstance(task_def, TaskDefinition)
+        assert hasattr(task_def, 'name')
 
 
 class TestResultsList(object):
@@ -139,7 +138,7 @@ class TestResultsList(object):
         the object is an instance of the results list class.
         """
         res = ResultsList()
-        assert_is_instance(res, ResultsList)
+        assert isinstance(res, ResultsList)
 
     @staticmethod
     def test_analyze_pass_results():
@@ -150,7 +149,7 @@ class TestResultsList(object):
         """
         res = ResultsList()
         res.append(dict(name='item1', status=0))
-        assert_equal(res.analyze(), 0)
+        assert res.analyze() == 0
 
     @staticmethod
     def test_analyze_failed_results():
@@ -161,4 +160,4 @@ class TestResultsList(object):
         """
         res = ResultsList()
         res.append(dict(name='item1', status=1))
-        assert_equal(res.analyze(), 1)
+        assert res.analyze() == 1
