@@ -12,8 +12,8 @@ import signal
 import sys
 import time
 import traceback
+import queue
 
-from blaster.compat import queue
 from blaster.core import *
 from blaster.metadata import __version__
 

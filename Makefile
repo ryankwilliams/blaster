@@ -2,7 +2,7 @@
 all: clean tests
 
 .PHONY: clean
-clean: clean-pyc clean-tox clean-code-coverage
+clean: clean-pyc clean-code-coverage
 
 .PHONY: clean-code-coverage
 clean-code-coverage:
@@ -12,10 +12,6 @@ clean-code-coverage:
 .PHONY: clean-packaging
 clean-packaging:
 	rm -rf *.egg*
-
-.PHONY: clean-tox
-clean-tox:
-	rm -rf .tox
 
 .PHONY: clean-pyc
 clean-pyc:
@@ -34,11 +30,5 @@ bump-minor:
 bump-patch:
 	bumpversion patch --commit
 
-tests: clean-code-coverage clean-tox
-	tox -e py27
-
-tests-py27: clean-code-coverage clean-tox
-	tox -e py27
-
-tests-py36: clean-code-coverage clean-tox
-	tox -e py36
+tests: clean-code-coverage
+	nosetests -v --with-ignore-docstrings --with-coverage --cover-package blaster --cover-html --cover-html-dir tests/coverage

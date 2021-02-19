@@ -9,5 +9,4 @@ build
 
 # Tests
 .coverage
-.tox
 tests/coverage
