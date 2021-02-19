@@ -18,14 +18,11 @@ setup(
     license='GPLv3',
     package_dir={'': '.'},
     packages=find_packages('.'),
+    python_requires='~=3.6',
     zip_safe=False,
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Software Development :: Quality Assurance',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3'
     ]
 )

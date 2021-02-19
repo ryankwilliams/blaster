@@ -3,9 +3,10 @@
 Test cases to test the blaster engine serial module.
 """
 
+import queue
+
 from nose.tools import assert_is_instance
 
-from blaster.compat import queue
 from blaster.blast import Worker
 from tests.examples.invalid import InvalidCar
 from tests.examples.valid import ValidCar
