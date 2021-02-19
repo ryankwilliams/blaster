@@ -1,0 +1,25 @@
+name: PR-Verification
+
+on:
+  pull_request:
+    branches:
+      - master
+
+  # Allow the ability to manually run this action
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Install python requirements
+        run: pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: |
+          export PATH="/home/runner/.local/bin:$PATH"
+          make
