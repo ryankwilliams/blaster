@@ -29,7 +29,7 @@ class BlasterError(Exception):
         :param str message: detailed error message
         :param list results: blaster results data
         """
-        super(BlasterError, self).__init__(message)
+        super().__init__(message)
 
         if results is None:
             results = list()
@@ -38,7 +38,7 @@ class BlasterError(Exception):
         self.results = results
 
 
-class LoggerMixin(object):
+class LoggerMixin:
     """Blaster's logger class to handle configuring loggers."""
 
     @staticmethod
@@ -64,7 +64,7 @@ class LoggerMixin(object):
         return getLogger(getmodule(stack()[1][0]).__name__)
 
 
-class CalcTimeMixin(object):
+class CalcTimeMixin:
     """Blaster's time calculation class to handle determining time deltas."""
 
     _start_time = None
@@ -101,7 +101,7 @@ class TaskDefinition(dict):
         :param args: variable number of arguments
         :param kwargs: key word arguments
         """
-        super(TaskDefinition, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.setdefault("bid", str(uuid4()))
         self.validate()
 
@@ -119,7 +119,7 @@ class ResultsList(list):
 
     def __init__(self):
         """Constructor."""
-        super(ResultsList, self).__init__()
+        super().__init__()
 
     def analyze(self):
         """Analyze the list of results based on overall task status.

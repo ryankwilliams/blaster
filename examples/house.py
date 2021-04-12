@@ -10,7 +10,7 @@ from time import sleep
 LOG = getLogger('blaster')
 
 
-class House(object):
+class House:
     """Build a house."""
 
     def __init__(self, style, **kwargs):

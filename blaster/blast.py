@@ -186,7 +186,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         total_tasks = len(self.tasks)
         if total_tasks < 10:
             count = total_tasks
-        self.logger.debug("Processor count: {}".format(count))
+        self.logger.debug(f"Processor count: {count}")
         return count
 
     def blastoff(self, serial=False, raise_on_failure=False):
