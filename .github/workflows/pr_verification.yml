@@ -3,7 +3,7 @@ name: PR-Verification
 on:
   pull_request:
     branches:
-      - master
+      - main
 
   # Allow the ability to manually run this action
   workflow_dispatch:
