@@ -1,7 +1,4 @@
-"""Blaster setup.
-
-The blaster setup module commonly containing Python packaging code.
-"""
+"""Blaster setup."""
 
 from setuptools import setup, find_packages
 
@@ -14,7 +11,6 @@ setup(
                 'methods defined',
     url='https://github.com/ryankwilliams/blaster',
     author='Ryan Williams',
-    author_email='rwilliams5262@gmail.com',
     license='GPLv3',
     package_dir={'': '.'},
     packages=find_packages('.'),

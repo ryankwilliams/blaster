@@ -15,17 +15,14 @@ environment and install blaster. Please see the commands below to install
 blaster.
 
 ```
-# install python virtualenv
-$ pip install python-virtualenv
+# Create a python virtual environment
+python3 -m venv venv
 
-# create virtualenv
-$ virtualenv blaster
+# Activate the virtual environment
+source venv/bin/activate
 
-# activate virtualenv
-$ source blaster/bin/activate
-
-# install blaster
-$ (blaster) pip install blaster
+# Install blaster
+(venv) pip install blaster
 ```
 
 ## Examples
