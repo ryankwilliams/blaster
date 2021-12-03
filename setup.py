@@ -1,24 +1,5 @@
 """Blaster setup."""
 
-from setuptools import setup, find_packages
+import setuptools
 
-from blaster.metadata import __name__, __version__
-
-setup(
-    name=__name__,
-    version=__version__,
-    description='Blast off a list of tasks concurrently calling each tasks '
-                'methods defined',
-    url='https://github.com/ryankwilliams/blaster',
-    author='Ryan Williams',
-    license='GPLv3',
-    package_dir={'': '.'},
-    packages=find_packages('.'),
-    python_requires='~=3.6',
-    zip_safe=False,
-    classifiers=[
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'Programming Language :: Python :: 3'
-    ]
-)
+setuptools.setup()
