@@ -5,6 +5,18 @@ All changes made to this project will be documented here.
 When adding changes, please follow the standards at the link below:
 https://keepachangelog.com/en/1.0.0/
 
+## [0.5.0] - 2021-12-03
+### Added
+- GitHub action for PR verification
+
+### Changed
+- Do not have git track visual sudio code directory
+- Use pytest framework over nose framework for unit tests
+- Miscellaneous packaging updates
+
+### Deprecated
+- Python 2.7 support
+
 ## [0.4.0] - 2020-07-01
 
 ### Changed
@@ -33,7 +45,7 @@ https://keepachangelog.com/en/1.0.0/
 ## [0.1.7] - 2018-04-17
 ### Changed
 - This release provides the ability for users to define a delay between
-  starting processes. By default this delay is 5 seconds.
+  starting processes. By default, this delay is 5 seconds.
 
 ## [0.1.6] - 2017-09-19
 ### Changed
@@ -64,7 +76,7 @@ https://keepachangelog.com/en/1.0.0/
 
 ## [0.1.2] - 2017-08-14
 ### Changed
-- This release brings an updated package structure and fine tunes the core
+- This release brings an updated package structure and fine-tunes the core
   classes.
 
 ## [0.1.1] - 2017-08-04
