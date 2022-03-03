@@ -28,9 +28,8 @@ class LoggerMixin:
     def create_blaster_logger(log_level: str) -> Logger:
         """Blaster logger creation.
 
-        :param str log_level: logging level
+        :param log_level: logging level
         :return: blaster logger
-        :rtype: object
         """
         blogger: Logger = getLogger("blaster")
         if not blogger.handlers:
@@ -65,7 +64,6 @@ class CalcTimeMixin:
         """Calculate time delta between start and end times.
 
         :return: hours, minutes, seconds
-        :rtype: float
         """
         elapsed = self._end_time - self._start_time
         hours = elapsed // 3600
@@ -108,7 +106,6 @@ class ResultsList(list):
         """Analyze the list of results based on overall task status.
 
         :return: whether task run was pass or fail.
-        :rtype: int
         """
         # TODO: Improve results typing to be a typed dict
         item: Dict[str, int]
@@ -126,8 +123,8 @@ class BlasterError(Exception):
     def __init__(self, message: str, results: Optional[ResultsList] = None) -> None:
         """Constructor.
 
-        :param str message: detailed error message
-        :param list results: blaster results data
+        :param message: detailed error message
+        :param results: blaster results data
         """
         super().__init__(message)
 
