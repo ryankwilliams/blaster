@@ -9,9 +9,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Install python requirements
+        run: pip install pre-commit
+
+      - name: Run pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure
+
   tests:
     runs-on: ubuntu-20.04
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
