@@ -53,24 +53,25 @@ class Worker(LoggerMixin):
         #     if task == "STOP":
         #         break
         for task in iter(task_queue.get, "STOP"):
-            self.logger.debug("Processing task: %s" % task['name'])
+            self.logger.debug("Processing task: %s" % task["name"])
 
             # Instantiate task class
-            task_obj = task['task'](**task)
+            task_obj = task["task"](**task)
 
             # Get the task timeout
-            timeout = task.pop('timeout', None)
+            timeout = task.pop("timeout", None)
 
             # A list holding all methods processed with their results
             methods = []
 
             def timeout_handler(signum, frame):
                 """Timeout handler."""
-                raise RuntimeError("Task: %s, method: %s, reached timeout!" %
-                                   (task['name'], method))
+                raise RuntimeError(
+                    "Task: %s, method: %s, reached timeout!" % (task["name"], method)
+                )
 
             # Loop through and run all task methods
-            for index, method in enumerate(task['methods']):
+            for index, method in enumerate(task["methods"]):
                 self.logger.debug("Running method %s" % method)
 
                 try:
@@ -83,34 +84,32 @@ class Worker(LoggerMixin):
                     value = getattr(task_obj, method)()
 
                     # Set the tasks method results
-                    methods.append({"name": method, "status": 0,
-                                    "rvalue": value})
-                    task['status'] = 0
+                    methods.append({"name": method, "status": 0, "rvalue": value})
+                    task["status"] = 0
                 except (Exception, KeyboardInterrupt) as e:
                     self.logger.error(
                         "A exception was raised while processing task: %s "
-                        "method: %s" % (task['name'], method))
-                    task['status'] = 1
+                        "method: %s" % (task["name"], method)
+                    )
+                    task["status"] = 1
 
                     # Get stack trace
                     stack_trace = self.get_traceback()
 
                     # Set the tasks method results
-                    methods.append({
-                        "name": method,
-                        "status": 1,
-                        "rvalue": None,
-                        "traceback": traceback.format_tb(stack_trace[2])
-                    })
+                    methods.append(
+                        {
+                            "name": method,
+                            "status": 1,
+                            "rvalue": None,
+                            "traceback": traceback.format_tb(stack_trace[2]),
+                        }
+                    )
 
                     # Set the remaining method results since they were not
                     # able to run
-                    for item in task['methods'][index+1:]:
-                        methods.append({
-                            "name": item,
-                            "status": "n/a",
-                            "rvalue": None
-                        })
+                    for item in task["methods"][index + 1 :]:
+                        methods.append({"name": item, "status": "n/a", "rvalue": None})
 
                     # Since a failure happened, we need to flush out the queue
                     flush_queue = True
@@ -123,15 +122,16 @@ class Worker(LoggerMixin):
                     if timeout:
                         signal.alarm(0)
 
-            task['methods'] = methods
+            task["methods"] = methods
             task_complete_queue.put(task)
 
             # Break out of the loop and flush out remaining tasks in the queue
             #  - expr_1 = parallel mode
             #  - expr_2 = sequential mode
-            expr_1 = (flush_queue and exeception_type == "keyboardinterrupt"
-                      and not serial)
-            expr_2 = (flush_queue and serial)
+            expr_1 = (
+                flush_queue and exeception_type == "keyboardinterrupt" and not serial
+            )
+            expr_2 = flush_queue and serial
             if expr_1 or expr_2:
                 time.sleep(1)
                 # Flush out remaining tasks in the queue
@@ -139,16 +139,14 @@ class Worker(LoggerMixin):
                     task = task_queue.get()
                     if task == "STOP":
                         break
-                    methods = task.pop('methods')
+                    methods = task.pop("methods")
                     _methods = []
                     for method in methods:
-                        _methods.append({
-                            "name": method,
-                            "status": "n/a",
-                            "rvalue": None
-                        })
-                    task['status'] = "n/a"
-                    task['methods'] = _methods
+                        _methods.append(
+                            {"name": method, "status": "n/a", "rvalue": None}
+                        )
+                    task["status"] = "n/a"
+                    task["methods"] = _methods
                     task_complete_queue.put(task)
                 break
 
@@ -199,8 +197,9 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         :rtype: list
         """
         self.logger.info("--> Blaster v%s <--" % __version__)
-        self.logger.info("Task Execution: %s" %
-                         ("Sequential" if serial else "Concurrent"))
+        self.logger.info(
+            "Task Execution: %s" % ("Sequential" if serial else "Concurrent")
+        )
 
         # Initialize queues based on execution type
         if serial:
@@ -213,10 +212,12 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         self.logger.info("Tasks:")
         for index, task in enumerate(self.tasks, start=1):
             task = TaskDefinition(task)
-            self.logger.info("""%s. Task     : %s
+            self.logger.info(
+                """%s. Task     : %s
                                 Class    : %s
-                                Methods  : %s""" % (
-                index, task['name'], task['task'], task['methods']))
+                                Methods  : %s"""
+                % (index, task["name"], task["task"], task["methods"])
+            )
             self.task_queue.put(task)
 
         # Save start time
@@ -235,8 +236,10 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             processes = []
             for i in range(processes_count):
                 processes.append(
-                    multiprocessing.Process(target=worker.run, args=(
-                        self.task_queue, self.task_complete_queue, serial))
+                    multiprocessing.Process(
+                        target=worker.run,
+                        args=(self.task_queue, self.task_complete_queue, serial),
+                    )
                 )
 
             # Start processes
@@ -251,7 +254,8 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             except KeyboardInterrupt:
                 self.logger.warning(
                     "Delaying 15 seconds to allow worker processes to flush "
-                    "out any remaining items in the queue.")
+                    "out any remaining items in the queue."
+                )
                 time.sleep(15)
 
                 while not self.task_complete_queue.empty():
@@ -276,14 +280,14 @@ class Blaster(CalcTimeMixin, LoggerMixin):
         # Calculate time delta
         hour, minutes, seconds = self.time_delta()
         self.logger.info("** BLASTER COMPLETE **")
-        self.logger.info("    -> TOTAL DURATION: %dh:%dm:%ds" %
-                         (hour, minutes, seconds))
+        self.logger.info(
+            "    -> TOTAL DURATION: %dh:%dm:%ds" % (hour, minutes, seconds)
+        )
 
         # Determine how to return results based on users input
         if raise_on_failure and self.results.analyze():
             raise BlasterError(
-                "One or more tasks got a status of non zero.",
-                results=self.results
+                "One or more tasks got a status of non zero.", results=self.results
             )
         else:
             return self.results

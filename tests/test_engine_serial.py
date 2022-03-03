@@ -46,10 +46,7 @@ class TestEngineSerial(object):
 
         # create task definition
         task_def = dict(
-            bid=1234,
-            name='car',
-            task=ValidCar,
-            methods=['exterior', 'interior']
+            bid=1234, name="car", task=ValidCar, methods=["exterior", "interior"]
         )
 
         input_queue = queue.Queue()
@@ -68,10 +65,7 @@ class TestEngineSerial(object):
 
         # create task definition
         task_def = dict(
-            bid=1234,
-            name='car',
-            task=InvalidCar,
-            methods=['exterior', 'interior']
+            bid=1234, name="car", task=InvalidCar, methods=["exterior", "interior"]
         )
 
         input_queue = queue.Queue()

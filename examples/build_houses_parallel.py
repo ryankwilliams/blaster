@@ -7,73 +7,67 @@ from time import sleep
 from blaster import Blaster
 from examples.house import House
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # list of tasks (houses to be built)
     tasks = [
         {
-            'name': 'House 1',
-            'task': House,
-            'methods': [
-                'foundation',
-                'frame',
-                'roof',
-                'furnish',
-                'enjoy'
-            ],
-            'style': 'contemporary'
+            "name": "House 1",
+            "task": House,
+            "methods": ["foundation", "frame", "roof", "furnish", "enjoy"],
+            "style": "contemporary",
         },
         {
-            'name': 'House 2',
-            'task': House,
-            'methods': [
-                'foundation',
-                'frame',
-                'roof',
-                'furnish',
-                'post_build_tasks',
-                'enjoy'
+            "name": "House 2",
+            "task": House,
+            "methods": [
+                "foundation",
+                "frame",
+                "roof",
+                "furnish",
+                "post_build_tasks",
+                "enjoy",
             ],
-            'style': 'cape'
+            "style": "cape",
         },
         {
-            'name': 'House 3',
-            'task': House,
-            'methods': [
-                'foundation',
-                'frame',
-                'roof',
-                'furnish',
-                'post_build_tasks',
-                'enjoy'
+            "name": "House 3",
+            "task": House,
+            "methods": [
+                "foundation",
+                "frame",
+                "roof",
+                "furnish",
+                "post_build_tasks",
+                "enjoy",
             ],
-            'style': 'colonial'
+            "style": "colonial",
         },
         {
-            'name': 'House 4',
-            'task': House,
-            'methods': [
-                'foundation',
-                'frame',
-                'roof',
-                'furnish',
-                'post_build_tasks',
-                'enjoy'
+            "name": "House 4",
+            "task": House,
+            "methods": [
+                "foundation",
+                "frame",
+                "roof",
+                "furnish",
+                "post_build_tasks",
+                "enjoy",
             ],
-            'style': 'ranch'
+            "style": "ranch",
         },
         {
-            'name': 'House 5',
-            'task': House,
-            'methods': [
-                'foundation',
-                'frame',
-                'roof',
-                'furnish',
-                'post_build_tasks',
-                'enjoy'
+            "name": "House 5",
+            "task": House,
+            "methods": [
+                "foundation",
+                "frame",
+                "roof",
+                "furnish",
+                "post_build_tasks",
+                "enjoy",
             ],
-            'style': 'split'
-        }
+            "style": "split",
+        },
     ]
 
     # create blaster object

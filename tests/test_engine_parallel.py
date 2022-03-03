@@ -47,13 +47,13 @@ class TestEngineParallel(object):
         # append data to in_queue
         in_queue.put(
             {
-                'bid': 1234,
-                'name': 'car',
-                'task': ValidCar,
-                'methods': ['exterior', 'interior']
+                "bid": 1234,
+                "name": "car",
+                "task": ValidCar,
+                "methods": ["exterior", "interior"],
             }
         )
-        in_queue.put('STOP')
+        in_queue.put("STOP")
         parallel = Worker()
         parallel.run(in_queue, out_queue, False)
 
@@ -69,12 +69,12 @@ class TestEngineParallel(object):
         # append data to in_queue
         in_queue.put(
             {
-                'bid': 1234,
-                'name': 'car',
-                'task': InvalidCar,
-                'methods': ['exterior', 'interior']
+                "bid": 1234,
+                "name": "car",
+                "task": InvalidCar,
+                "methods": ["exterior", "interior"],
             }
         )
-        in_queue.put('STOP')
+        in_queue.put("STOP")
         parallel = Worker()
         parallel.run(in_queue, out_queue, False)
