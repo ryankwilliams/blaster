@@ -9,7 +9,7 @@ dist
 build
 
 # Tests
-.coverage
+.coverage*
 
 # Virtualenvs
 venv
