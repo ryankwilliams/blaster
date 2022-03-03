@@ -35,11 +35,7 @@ class TestBlast(object):
         """
         blaster = Blaster(
             tasks=[
-                {
-                    'name': 'car',
-                    'task': ValidCar,
-                    'methods': ['exterior', 'interior']
-                }
+                {"name": "car", "task": ValidCar, "methods": ["exterior", "interior"]}
             ]
         )
         blaster.blastoff(serial=True)
@@ -52,12 +48,7 @@ class TestBlast(object):
         """
         with pytest.raises(BlasterError):
             blaster = Blaster(
-                tasks=[
-                    {
-                        'task': ValidCar,
-                        'methods': ['exterior', 'interior']
-                    }
-                ]
+                tasks=[{"task": ValidCar, "methods": ["exterior", "interior"]}]
             )
             blaster.blastoff(serial=True)
 
@@ -73,9 +64,9 @@ class TestBlast(object):
             blaster = Blaster(
                 tasks=[
                     {
-                        'name': 'car',
-                        'task': InvalidCar,
-                        'methods': ['exterior', 'interior']
+                        "name": "car",
+                        "task": InvalidCar,
+                        "methods": ["exterior", "interior"],
                     }
                 ]
             )
@@ -89,11 +80,7 @@ class TestBlast(object):
         """
         blaster = Blaster(
             tasks=[
-                {
-                    'name': 'car',
-                    'task': ValidCar,
-                    'methods': ['exterior', 'interior']
-                }
+                {"name": "car", "task": ValidCar, "methods": ["exterior", "interior"]}
             ]
         )
         blaster.blastoff()
@@ -106,12 +93,7 @@ class TestBlast(object):
         """
         with pytest.raises(BlasterError):
             blaster = Blaster(
-                tasks=[
-                    {
-                        'task': ValidCar,
-                        'methods': ['exterior', 'interior']
-                    }
-                ]
+                tasks=[{"task": ValidCar, "methods": ["exterior", "interior"]}]
             )
             blaster.blastoff()
 
@@ -127,9 +109,9 @@ class TestBlast(object):
             blaster = Blaster(
                 tasks=[
                     {
-                        'name': 'car',
-                        'task': InvalidCar,
-                        'methods': ['exterior', 'interior']
+                        "name": "car",
+                        "task": InvalidCar,
+                        "methods": ["exterior", "interior"],
                     }
                 ]
             )
@@ -146,11 +128,7 @@ class TestBlast(object):
         for i in range(10):
             i += 1
             tasks.append(
-                {
-                    'name': 'car',
-                    'task': ValidCar,
-                    'methods': ['exterior', 'interior']
-                }
+                {"name": "car", "task": ValidCar, "methods": ["exterior", "interior"]}
             )
         blaster = Blaster(tasks=tasks)
         blaster.blastoff()

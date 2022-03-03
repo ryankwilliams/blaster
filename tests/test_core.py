@@ -6,8 +6,13 @@ from time import sleep
 
 import pytest
 
-from blaster.core import BlasterError, CalcTimeMixin, LoggerMixin, \
-    ResultsList, TaskDefinition
+from blaster.core import (
+    BlasterError,
+    CalcTimeMixin,
+    LoggerMixin,
+    ResultsList,
+    TaskDefinition,
+)
 
 
 class TestBlasterError(object):
@@ -24,9 +29,9 @@ class TestBlasterError(object):
         verify the values returned from the exception.
         """
         try:
-            raise BlasterError('Blaster error!')
+            raise BlasterError("Blaster error!")
         except BlasterError as ex:
-            assert 'Blaster error!' == ex.message
+            assert "Blaster error!" == ex.message
             assert list() == ex.results
 
 
@@ -46,7 +51,7 @@ class TestLoggerMixin(object):
         the logger mixin class.
         """
         logger = LoggerMixin()
-        logger.create_blaster_logger('info')
+        logger.create_blaster_logger("info")
         assert isinstance(logger, LoggerMixin)
 
     @staticmethod
@@ -56,8 +61,8 @@ class TestLoggerMixin(object):
         This method tests logging a message with a logger mixin object.
         """
         logger = LoggerMixin()
-        logger.create_blaster_logger('info')
-        logger.logger.info('Blaster!')
+        logger.create_blaster_logger("info")
+        logger.logger.info("Blaster!")
 
 
 class TestCalcTimeMixin(object):
@@ -122,9 +127,9 @@ class TestTaskDefinition(object):
         instance of the task definition class. As well as verify it has the
         name attribute.
         """
-        task_def = TaskDefinition(name='blaster')
+        task_def = TaskDefinition(name="blaster")
         assert isinstance(task_def, TaskDefinition)
-        assert hasattr(task_def, 'name')
+        assert hasattr(task_def, "name")
 
 
 class TestResultsList(object):
@@ -148,7 +153,7 @@ class TestResultsList(object):
         valid. (positive test)
         """
         res = ResultsList()
-        res.append(dict(name='item1', status=0))
+        res.append(dict(name="item1", status=0))
         assert res.analyze() == 0
 
     @staticmethod
@@ -159,5 +164,5 @@ class TestResultsList(object):
         invalid. (negative test)
         """
         res = ResultsList()
-        res.append(dict(name='item1', status=1))
+        res.append(dict(name="item1", status=1))
         assert res.analyze() == 1

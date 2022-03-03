@@ -17,7 +17,7 @@ __all__ = [
     "CalcTimeMixin",
     "LoggerMixin",
     "TaskDefinition",
-    "ResultsList"
+    "ResultsList",
 ]
 
 
@@ -32,7 +32,7 @@ class LoggerMixin:
         :return: blaster logger
         :rtype: object
         """
-        blogger: Logger = getLogger('blaster')
+        blogger: Logger = getLogger("blaster")
         if not blogger.handlers:
             chandler: StreamHandler = StreamHandler()
             chandler.setLevel(LOG_LEVELS[log_level])
@@ -93,8 +93,8 @@ class TaskDefinition(dict):
         for key in REQ_TASK_KEYS:
             if key not in self:
                 raise BlasterError(
-                    "Required key: '%s' missing from task: %s" %
-                    (key, self.get('name')))
+                    "Required key: '%s' missing from task: %s" % (key, self.get("name"))
+                )
 
 
 class ResultsList(list):
@@ -114,7 +114,7 @@ class ResultsList(list):
         item: Dict[str, int]
 
         for item in self:
-            if item['status'] != 0:
+            if item["status"] != 0:
                 return 1
         return 0
 
