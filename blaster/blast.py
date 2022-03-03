@@ -45,7 +45,7 @@ class Worker(LoggerMixin):
         flush_queue = False
 
         # Holds the type of exception thrown
-        exeception_type = ""
+        exception_type = ""
 
         # Loop through all tasks in the queue
         # while True:
@@ -129,7 +129,7 @@ class Worker(LoggerMixin):
             #  - expr_1 = parallel mode
             #  - expr_2 = sequential mode
             expr_1 = (
-                flush_queue and exeception_type == "keyboardinterrupt" and not serial
+                flush_queue and exception_type == "keyboardinterrupt" and not serial
             )
             expr_2 = flush_queue and serial
             if expr_1 or expr_2:
