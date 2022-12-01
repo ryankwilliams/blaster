@@ -5,6 +5,14 @@ All changes made to this project will be documented here.
 When adding changes, please follow the standards at the link below:
 https://keepachangelog.com/en/1.0.0/
 
+## [0.6.0] - 2022-11-30
+
+### Changed
+- Set the base python version to 3.9 and above
+
+### Deprecated
+- Python < 3.9 support
+
 ## [0.5.0] - 2021-12-03
 ### Added
 - GitHub action for PR verification
