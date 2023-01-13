@@ -1,5 +1,8 @@
 """Blaster metadata."""
 
-__all__ = ["__version__"]
+from typing import List
 
-__version__ = "0.6.0"
+
+__all__: List[str] = ["__version__"]
+
+__version__: str = "0.6.0"

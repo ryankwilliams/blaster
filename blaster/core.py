@@ -10,9 +10,9 @@ from uuid import uuid4
 
 from blaster.constants import *
 
-LOG = getLogger(__name__)
+LOG: Logger = getLogger(__name__)
 
-__all__ = [
+__all__: List[str] = [
     "BlasterError",
     "CalcTimeMixin",
     "LoggerMixin",
@@ -43,14 +43,14 @@ class LoggerMixin:
     @property
     def logger(self) -> Logger:
         """Returns the default logger object."""
-        return getLogger(getmodule(stack()[1][0]).__name__)
+        return getLogger(getmodule(stack()[1][0]).__name__)  # type: ignore
 
 
 class CalcTimeMixin:
     """Blaster's time calculation class to handle determining time deltas."""
 
-    _start_time: float = None
-    _end_time: float = None
+    _start_time: float = 0.0
+    _end_time: float = 0.0
 
     def start_time(self) -> None:
         """Save the start time."""
@@ -91,7 +91,7 @@ class TaskDefinition(dict):
         for key in REQ_TASK_KEYS:
             if key not in self:
                 raise BlasterError(
-                    "Required key: '%s' missing from task: %s" % (key, self.get("name"))
+                    f"Required key: '{key}' missing from task: {self.get('name')}"
                 )
 
 
@@ -107,7 +107,6 @@ class ResultsList(list):
 
         :return: whether task run was pass or fail.
         """
-        # TODO: Improve results typing to be a typed dict
         item: Dict[str, int]
 
         for item in self:
@@ -120,7 +119,9 @@ class BlasterError(Exception):
     """Blaster's base error to raise."""
 
     # TODO: Improve results typing to be a typed dict
-    def __init__(self, message: str, results: Optional[ResultsList] = None) -> None:
+    def __init__(
+        self, message: str, results: Optional[List[Dict[str, int]]] = None
+    ) -> None:
         """Constructor.
 
         :param message: detailed error message

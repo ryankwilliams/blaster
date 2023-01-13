@@ -6,7 +6,7 @@ from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING
 from typing import Dict
 from typing import List
 
-__all__ = ["LOG_LEVELS", "LOG_FORMAT", "REQ_TASK_KEYS"]
+__all__: List[str] = ["LOG_LEVELS", "LOG_FORMAT", "REQ_TASK_KEYS"]
 
 LOG_LEVELS: Dict[str, int] = {
     "debug": DEBUG,
