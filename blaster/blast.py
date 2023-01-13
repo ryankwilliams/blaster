@@ -13,6 +13,7 @@ import sys
 import time
 import traceback
 import queue
+from typing import Any, Dict, List, Optional, Union
 
 from blaster.core import *
 from blaster.metadata import __version__
@@ -21,37 +22,36 @@ from blaster.metadata import __version__
 class Worker(LoggerMixin):
     """Worker class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Constructor."""
         pass
 
     @staticmethod
-    def get_traceback():
+    def get_traceback() -> tuple:
         """Return stack trace from the exception raised."""
         traceback.print_exc()
         return sys.exc_info()
 
-    def run(self, task_queue, task_complete_queue, serial):
+    def run(
+        self,
+        task_queue: Union[queue.Queue, multiprocessing.Queue],
+        task_complete_queue: Union[queue.Queue, multiprocessing.Queue],
+        serial: bool,
+    ) -> None:
         """Process the tasks methods from the given queues.
 
-        :param queue.Queue task_queue: the queue containing the
-            tasks to process.
-        :param queue.Queue task_complete_queue: the queue containing
-            updated tasks that have been or failed to fully process
-        :param bool serial: whether this method is being run concurrently or
+        :param task_queue: the queue containing the tasks to process.
+        :param task_complete_queue: the queue containing updated tasks that
+            have been or failed to fully process
+        :param serial: whether this method is being run concurrently or
             sequentially
         """
         # Controls if remaining tasks in the queue should be flushed out
-        flush_queue = False
+        flush_queue: bool = False
 
         # Holds the type of exception thrown
-        exception_type = ""
+        exception_type: str = ""
 
-        # Loop through all tasks in the queue
-        # while True:
-        #     task = task_queue.get()
-        #     if task == "STOP":
-        #         break
         for task in iter(task_queue.get, "STOP"):
             self.logger.debug("Processing task: %s" % task["name"])
 
@@ -62,12 +62,12 @@ class Worker(LoggerMixin):
             timeout = task.pop("timeout", None)
 
             # A list holding all methods processed with their results
-            methods = []
+            methods: List[Dict[str, Any]] = []
 
-            def timeout_handler(signum, frame):
+            def timeout_handler(signum, frame) -> None:
                 """Timeout handler."""
                 raise RuntimeError(
-                    "Task: %s, method: %s, reached timeout!" % (task["name"], method)
+                    f"Task: {task['name']}, method: {method}, reached timeout!"
                 )
 
             # Loop through and run all task methods
@@ -94,7 +94,7 @@ class Worker(LoggerMixin):
                     task["status"] = 1
 
                     # Get stack trace
-                    stack_trace = self.get_traceback()
+                    stack_trace: tuple = self.get_traceback()
 
                     # Set the tasks method results
                     methods.append(
@@ -157,44 +157,44 @@ class Worker(LoggerMixin):
 class Blaster(CalcTimeMixin, LoggerMixin):
     """Blaster class."""
 
-    def __init__(self, tasks, log_level="info"):
+    def __init__(self, tasks: List[Dict[str, Any]], log_level: str = "info") -> None:
         """Constructor.
 
         Responsible for initializing attributes and performing any base
         configuration required.
 
-        :param list tasks: the list of tasks to be processed
-        :param str log_level: the logging level to be used when logging
-            messages
+        :param tasks: list of tasks to be processed
+        :param log_level: logging level to be used when logging messages
         """
-        self.tasks = tasks
+        self.tasks: List[Dict[str, Any]] = tasks
 
         # Set place holder attributes for queues
-        self.task_queue = None
-        self.task_complete_queue = None
+        self.task_queue: Union[queue.Queue, multiprocessing.Queue]
+        self.task_complete_queue: Union[queue.Queue, multiprocessing.Queue]
 
-        self.results = ResultsList()
+        self.results: ResultsList = ResultsList()
 
         # Configure blasters logger
         self.create_blaster_logger(log_level.lower())
 
-    def total_processes(self):
+    def total_processes(self) -> int:
         """Return the total number of worker processes to use."""
-        count = 10
-        total_tasks = len(self.tasks)
+        count: int = 10
+        total_tasks: int = len(self.tasks)
         if total_tasks < 10:
             count = total_tasks
         self.logger.debug(f"Processor count: {count}")
         return count
 
-    def blastoff(self, serial=False, raise_on_failure=False):
+    def blastoff(
+        self, serial: bool = False, raise_on_failure: bool = False
+    ) -> List[Dict[str, int]]:
         """Blast off tasks concurrently or sequentially calling their defined
                 methods.
 
-        :param bool serial: whether to run tasks sequentially
-        :param bool raise_on_failure: whether to raise exception on failure
+        :param serial: whether to run tasks sequentially
+        :param raise_on_failure: whether to raise exception on failure
         :return: content from task method calls
-        :rtype: list
         """
         self.logger.info("--> Blaster v%s <--" % __version__)
         self.logger.info(
@@ -211,7 +211,7 @@ class Blaster(CalcTimeMixin, LoggerMixin):
 
         self.logger.info("Tasks:")
         for index, task in enumerate(self.tasks, start=1):
-            task = TaskDefinition(task)
+            task = TaskDefinition(task)  # type: ignore
             self.logger.info(
                 """%s. Task     : %s
                                 Class    : %s
@@ -225,15 +225,15 @@ class Blaster(CalcTimeMixin, LoggerMixin):
 
         self.logger.info("** BLASTER BEGIN **")
 
-        worker = Worker()
+        worker: Worker = Worker()
         if serial:
             worker.run(self.task_queue, self.task_complete_queue, serial)
         else:
             # Determine the number of processes to use
-            processes_count = self.total_processes()
+            processes_count: int = self.total_processes()
 
             # Build processes
-            processes = []
+            processes: List[multiprocessing.Process] = []
             for i in range(processes_count):
                 processes.append(
                     multiprocessing.Process(
