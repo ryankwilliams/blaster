@@ -3,50 +3,50 @@
 This module contains a class which has methods for building different aspects
 to a house.
 """
-from logging import getLogger
+from logging import getLogger, Logger
 from time import sleep
+from typing import Any, Dict
 
 
-LOG = getLogger("blaster")
+LOG: Logger = getLogger("blaster")
 
 
 class House:
     """Build a house."""
 
-    def __init__(self, style, **kwargs):
+    def __init__(self, style: str, **kwargs: Dict[str, Any]) -> None:
         """Constructor.
 
-        :param style: Style of the house to build.
-        :type style: str
+        :param style: style of the house to build
         """
-        self.style = style
+        self.style: str = style
 
-    def foundation(self):
+    def foundation(self) -> None:
         """Build the foundation."""
-        LOG.info("Building the foundation for %s house.." % self.style)
+        LOG.info(f"Building the foundation for {self.style} house..")
         sleep(1)
 
-    def frame(self):
+    def frame(self) -> None:
         """Frame the house."""
-        LOG.info("Frame the house for %s house.." % self.style)
+        LOG.info(f"Frame the house for {self.style} house..")
         sleep(1)
 
-    def roof(self):
+    def roof(self) -> None:
         """Roof the house."""
-        LOG.info("Roof the house for %s house.." % self.style)
+        LOG.info(f"Roof the house for {self.style} house..")
         sleep(1)
 
-    def furnish(self):
+    def furnish(self) -> None:
         """Furnish the house."""
-        LOG.info("Furnish the house for %s house.." % self.style)
+        LOG.info(f"Furnish the house for {self.style} house..")
         sleep(1)
 
-    def enjoy(self):
+    def enjoy(self) -> None:
         """Enjoy the house."""
-        LOG.info("Enjoy your new %s house :)" % self.style)
+        LOG.info(f"Enjoy your new {self.style} house :)")
         sleep(1)
 
-    def post_build_tasks(self):
+    def post_build_tasks(self) -> None:
         """Post build tasks after house is built."""
-        LOG.info("Perform post building tasks for %s house.." % self.style)
+        LOG.info(f"Perform post building tasks for {self.style} house..")
         sleep(1)

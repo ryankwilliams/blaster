@@ -3,13 +3,14 @@ development in sequential.
 """
 from pprint import pprint
 from time import sleep
+from typing import Any, Dict, List
 
 from blaster import Blaster
 from examples.house import House
 
 if __name__ == "__main__":
     # list of tasks (houses to be built)
-    tasks = [
+    tasks: List[Dict[str, Any]] = [
         {
             "name": "House 1",
             "task": House,
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     ]
 
     # create blaster object
-    blast = Blaster(tasks)
+    blast: Blaster = Blaster(tasks)
 
     # blast off tasks in sequential
     data = blast.blastoff(serial=True)
