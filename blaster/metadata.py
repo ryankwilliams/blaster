@@ -1,5 +1,4 @@
 """Blaster metadata."""
-
 from typing import List
 
 

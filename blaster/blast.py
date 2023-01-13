@@ -6,14 +6,17 @@ need for each application to write their own code to run tasks. Leave all of
 this work up to blaster and just provide the classes and methods you would
 like to run.
 """
-
 import multiprocessing
+import queue
 import signal
 import sys
 import time
 import traceback
-import queue
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
 from blaster.core import *
 from blaster.metadata import __version__

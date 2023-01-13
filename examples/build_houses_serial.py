@@ -3,7 +3,9 @@ development in sequential.
 """
 from pprint import pprint
 from time import sleep
-from typing import Any, Dict, List
+from typing import Any
+from typing import Dict
+from typing import List
 
 from blaster import Blaster
 from examples.house import House

@@ -2,7 +2,6 @@
 
 Test cases to test the blaster engine serial module.
 """
-
 import queue
 
 from blaster.blast import Worker

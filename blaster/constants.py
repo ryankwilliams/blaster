@@ -2,7 +2,11 @@
 
 The constant's module contains commonly used constants by blaster.
 """
-from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING
+from logging import CRITICAL
+from logging import DEBUG
+from logging import ERROR
+from logging import INFO
+from logging import WARNING
 from typing import Dict
 from typing import List
 
