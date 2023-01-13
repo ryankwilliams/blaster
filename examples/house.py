@@ -3,9 +3,11 @@
 This module contains a class which has methods for building different aspects
 to a house.
 """
-from logging import getLogger, Logger
+from logging import getLogger
+from logging import Logger
 from time import sleep
-from typing import Any, Dict
+from typing import Any
+from typing import Dict
 
 
 LOG: Logger = getLogger("blaster")

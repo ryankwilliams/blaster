@@ -4,7 +4,8 @@ Test cases to test the blaster blast module.
 """
 import pytest
 
-from blaster import Blaster, BlasterError
+from blaster import Blaster
+from blaster import BlasterError
 from tests.examples.invalid import InvalidCar
 from tests.examples.valid import ValidCar
 

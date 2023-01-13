@@ -6,13 +6,11 @@ from time import sleep
 
 import pytest
 
-from blaster.core import (
-    BlasterError,
-    CalcTimeMixin,
-    LoggerMixin,
-    ResultsList,
-    TaskDefinition,
-)
+from blaster.core import BlasterError
+from blaster.core import CalcTimeMixin
+from blaster.core import LoggerMixin
+from blaster.core import ResultsList
+from blaster.core import TaskDefinition
 
 
 class TestBlasterError(object):
